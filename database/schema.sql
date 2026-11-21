@@ -1,5 +1,6 @@
 -- ==========================================================
 -- SkillLens Hackathon MVP Database Schema (Supabase PostgreSQL)
+-- Refocused for Beginners: 4 Core Skills (Python, HTML, CSS, JS)
 -- ==========================================================
 
 -- 1. PROFILES TABLE (Linked with Supabase Auth)
@@ -7,17 +8,18 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     email TEXT,
     full_name TEXT NOT NULL,
-    target_role TEXT DEFAULT 'AI & ML Intern',
+    target_role TEXT DEFAULT 'Junior Full-Stack Starter',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 2. SKILLS MASTER CATALOG
+-- 2. SKILLS MASTER CATALOG (4 Core Beginner Skills)
 CREATE TABLE IF NOT EXISTS public.skills (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL UNIQUE,
-    category TEXT NOT NULL, -- 'Programming', 'AI & ML', 'Web Development', 'Data & Database', 'Tools & DevOps'
-    description TEXT
+    category TEXT NOT NULL,
+    description TEXT,
+    subtopics TEXT[] NOT NULL DEFAULT '{}'
 );
 
 -- 3. USER SKILLS TABLE (Student Selected Skills)
@@ -25,21 +27,21 @@ CREATE TABLE IF NOT EXISTS public.user_skills (
     id SERIAL PRIMARY KEY,
     user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
     skill_name TEXT NOT NULL,
-    proficiency TEXT DEFAULT 'Beginner', -- 'Beginner', 'Intermediate', 'Advanced'
+    proficiency TEXT DEFAULT 'Beginner',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     UNIQUE(user_id, skill_name)
 );
 
--- 4. ROLE REQUIREMENTS BENCHMARK
+-- 4. ROLE REQUIREMENTS BENCHMARK (Beginner Friendly Tracks)
 CREATE TABLE IF NOT EXISTS public.role_requirements (
     id SERIAL PRIMARY KEY,
     role_name TEXT NOT NULL,
     skill_name TEXT NOT NULL,
-    importance TEXT DEFAULT 'Required', -- 'Required' or 'Preferred'
+    importance TEXT DEFAULT 'Required',
     UNIQUE(role_name, skill_name)
 );
 
--- 5. PRACTICAL TASKS CATALOG (What can I build right now?)
+-- 5. PRACTICAL TASKS CATALOG (Short & Practical)
 CREATE TABLE IF NOT EXISTS public.tasks (
     id SERIAL PRIMARY KEY,
     title TEXT NOT NULL,
@@ -47,10 +49,21 @@ CREATE TABLE IF NOT EXISTS public.tasks (
     description TEXT NOT NULL,
     required_skills TEXT[] NOT NULL,
     difficulty TEXT DEFAULT 'Beginner',
-    estimated_time TEXT DEFAULT '2-4 hours'
+    estimated_time TEXT DEFAULT '15-30 mins'
 );
 
--- 6. USER PROJECTS & EVIDENCE SUBMISSION
+-- 6. BEGINNER PROJECTS CATALOG (Small & Practical)
+CREATE TABLE IF NOT EXISTS public.projects (
+    id SERIAL PRIMARY KEY,
+    title TEXT NOT NULL UNIQUE,
+    description TEXT NOT NULL,
+    required_skills TEXT[] NOT NULL,
+    difficulty TEXT DEFAULT 'Beginner',
+    implementation_steps TEXT[] NOT NULL,
+    expected_outcome TEXT NOT NULL
+);
+
+-- 7. USER PROJECTS & EVIDENCE SUBMISSION
 CREATE TABLE IF NOT EXISTS public.user_projects_evidence (
     id SERIAL PRIMARY KEY,
     user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
@@ -59,11 +72,11 @@ CREATE TABLE IF NOT EXISTS public.user_projects_evidence (
     description TEXT,
     github_url TEXT NOT NULL,
     live_url TEXT,
-    status TEXT DEFAULT 'Submitted', -- 'In Progress', 'Submitted', 'Verified'
+    status TEXT DEFAULT 'Submitted',
     submitted_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 7. READINESS REPORTS
+-- 8. READINESS REPORTS
 CREATE TABLE IF NOT EXISTS public.readiness_reports (
     id SERIAL PRIMARY KEY,
     user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
@@ -75,84 +88,139 @@ CREATE TABLE IF NOT EXISTS public.readiness_reports (
 );
 
 -- ==========================================================
--- SEED DATA: Pre-populate Skills Catalog
+-- SEED DATA: 4 Core Beginner Skills with Subtopics
 -- ==========================================================
-INSERT INTO public.skills (name, category, description) VALUES
-('Python', 'Programming', 'Core general-purpose programming language for AI and scripting'),
-('C++', 'Programming', 'Fast compiled language for systems and low-level algorithms'),
-('Java', 'Programming', 'Object-oriented programming language'),
-('JavaScript', 'Web Development', 'Interactive scripting for web frontend and backends'),
-('HTML/CSS', 'Web Development', 'Foundational markup and styling for web applications'),
-('Flask', 'Web Development', 'Lightweight WSGI Python web framework'),
-('FastAPI', 'Web Development', 'Modern, fast web framework for building APIs with Python'),
-('NumPy', 'AI & ML', 'Scientific computing and multidimensional array operations'),
-('Pandas', 'Data & Database', 'Data analysis, cleaning, and tabular data manipulation'),
-('Matplotlib & Seaborn', 'Data & Database', 'Data visualization and statistical plotting'),
-('Scikit-Learn', 'AI & ML', 'Machine learning algorithms for classification and regression'),
-('TensorFlow', 'AI & ML', 'Deep learning framework for building neural networks'),
-('PyTorch', 'AI & ML', 'Dynamic deep learning framework popular in research'),
-('OpenCV', 'AI & ML', 'Computer vision and image processing library'),
-('Natural Language Processing (NLP)', 'AI & ML', 'Text processing, tokenization, and language models'),
-('SQL', 'Data & Database', 'Relational database query language'),
-('PostgreSQL', 'Data & Database', 'Powerful open-source object-relational database system'),
-('Git & GitHub', 'Tools & DevOps', 'Version control and collaboration platform'),
-('Docker', 'Tools & DevOps', 'Containerization platform for software packaging')
-ON CONFLICT (name) DO NOTHING;
+INSERT INTO public.skills (name, category, description, subtopics) VALUES
+('Python', 'Programming Logic', 'A clean, beginner-friendly language great for logic, problem solving, and scripting.', ARRAY['Variables', 'Data Types', 'Conditions', 'Loops', 'Functions']),
+('HTML', 'Web Structure', 'The foundational skeleton of every website. Used to display headings, paragraphs, and forms.', ARRAY['Headings', 'Paragraphs', 'Links', 'Images', 'Forms']),
+('CSS', 'Web Styling', 'Adds visual style, colors, fonts, margins, and modern layouts to HTML pages.', ARRAY['Colors', 'Fonts', 'Margins', 'Padding', 'Flexbox']),
+('JavaScript', 'Web Interactivity', 'Brings web pages to life with interactive buttons, clicks, alerts, and live updates.', ARRAY['Variables', 'Functions', 'Events', 'DOM Manipulation'])
+ON CONFLICT (name) DO UPDATE SET
+    category = EXCLUDED.category,
+    description = EXCLUDED.description,
+    subtopics = EXCLUDED.subtopics;
 
 -- ==========================================================
--- SEED DATA: Role Requirements
+-- SEED DATA: Role Requirements (Beginner Career Paths)
 -- ==========================================================
 INSERT INTO public.role_requirements (role_name, skill_name, importance) VALUES
--- AI & ML Intern
-('AI & ML Intern', 'Python', 'Required'),
-('AI & ML Intern', 'NumPy', 'Required'),
-('AI & ML Intern', 'Pandas', 'Required'),
-('AI & ML Intern', 'Scikit-Learn', 'Required'),
-('AI & ML Intern', 'Git & GitHub', 'Required'),
-('AI & ML Intern', 'Matplotlib & Seaborn', 'Preferred'),
-('AI & ML Intern', 'PyTorch', 'Preferred'),
-('AI & ML Intern', 'SQL', 'Preferred'),
+-- Junior Full-Stack Starter
+('Junior Full-Stack Starter', 'Python', 'Required'),
+('Junior Full-Stack Starter', 'HTML', 'Required'),
+('Junior Full-Stack Starter', 'CSS', 'Required'),
+('Junior Full-Stack Starter', 'JavaScript', 'Required'),
 
--- Data Analyst Intern
-('Data Analyst Intern', 'Python', 'Required'),
-('Data Analyst Intern', 'Pandas', 'Required'),
-('Data Analyst Intern', 'SQL', 'Required'),
-('Data Analyst Intern', 'Matplotlib & Seaborn', 'Required'),
-('Data Analyst Intern', 'Git & GitHub', 'Preferred'),
-('Data Analyst Intern', 'Scikit-Learn', 'Preferred'),
+-- Frontend Web Developer (Beginner)
+('Frontend Web Developer (Beginner)', 'HTML', 'Required'),
+('Frontend Web Developer (Beginner)', 'CSS', 'Required'),
+('Frontend Web Developer (Beginner)', 'JavaScript', 'Required'),
+('Frontend Web Developer (Beginner)', 'Python', 'Preferred'),
 
--- Python Backend Intern
-('Python Backend Intern', 'Python', 'Required'),
-('Python Backend Intern', 'Flask', 'Required'),
-('Python Backend Intern', 'SQL', 'Required'),
-('Python Backend Intern', 'Git & GitHub', 'Required'),
-('Python Backend Intern', 'PostgreSQL', 'Preferred'),
-('Python Backend Intern', 'Docker', 'Preferred'),
-
--- Frontend Developer Intern
-('Frontend Developer Intern', 'HTML/CSS', 'Required'),
-('Frontend Developer Intern', 'JavaScript', 'Required'),
-('Frontend Developer Intern', 'Git & GitHub', 'Required'),
-
--- Full Stack Intern
-('Full Stack Intern', 'Python', 'Required'),
-('Full Stack Intern', 'Flask', 'Required'),
-('Full Stack Intern', 'HTML/CSS', 'Required'),
-('Full Stack Intern', 'JavaScript', 'Required'),
-('Full Stack Intern', 'SQL', 'Required'),
-('Full Stack Intern', 'Git & GitHub', 'Required')
+-- Junior Python Developer
+('Junior Python Developer', 'Python', 'Required'),
+('Junior Python Developer', 'HTML', 'Preferred'),
+('Junior Python Developer', 'CSS', 'Preferred')
 ON CONFLICT (role_name, skill_name) DO NOTHING;
 
 -- ==========================================================
--- SEED DATA: Practical Tasks (Feature 2)
+-- SEED DATA: Small & Practical Beginner Tasks
 -- ==========================================================
 INSERT INTO public.tasks (title, category, description, required_skills, difficulty, estimated_time) VALUES
-('Automated CSV Cleaner & Formatter', 'Data & Scripting', 'Write a Python script that parses messy CSV datasets, strips null values, fixes datatypes, and exports a clean summary.', ARRAY['Python', 'Pandas'], 'Beginner', '2 hours'),
-('Interactive Weather Web Widget', 'Web Development', 'Build a frontend widget that takes a city name, fetches mock or real weather data, and renders animated weather cards.', ARRAY['HTML/CSS', 'JavaScript'], 'Beginner', '3 hours'),
-('CLI Student Grade Calculator', 'Programming', 'A command-line tool with clean menu navigation to add students, record marks, and compute GPA with file persistence.', ARRAY['Python'], 'Beginner', '1-2 hours'),
-('House Price Predictor with Linear Regression', 'AI & Machine Learning', 'Train a supervised regression model on housing dataset to predict prices, complete with error metrics (RMSE, R2).', ARRAY['Python', 'NumPy', 'Pandas', 'Scikit-Learn'], 'Intermediate', '4 hours'),
-('Lightweight REST API for a Note-Taking App', 'Web Backend', 'Create CRUD endpoints (Create, Read, Update, Delete) for notes with input validation and JSON responses.', ARRAY['Python', 'Flask'], 'Beginner', '3 hours'),
-('Exploratory Data Analysis (EDA) on Titanic Dataset', 'Data Science', 'Analyze passenger demographics, plot correlation heatmaps, and discover survival drivers.', ARRAY['Python', 'Pandas', 'Matplotlib & Seaborn'], 'Beginner', '2.5 hours'),
-('Image Filter & Face Detection Script', 'Computer Vision', 'Use Haar cascades in OpenCV to detect faces and apply custom filters to photos automatically.', ARRAY['Python', 'OpenCV'], 'Intermediate', '3 hours'),
-('Full-Stack Task Board with SQLite', 'Full Stack', 'Build a mini-Trello clone with a Flask backend, SQLite database, and HTML/CSS/JS frontend.', ARRAY['Python', 'Flask', 'HTML/CSS', 'JavaScript', 'SQL'], 'Intermediate', '6 hours')
+-- Python Tasks
+('Print Your Name and Bio', 'Python Logic', 'Write a Python script using variables and print() to display your name, college, and a short bio.', ARRAY['Python'], 'Beginner', '15 mins'),
+('Create a Simple Calculator', 'Python Logic', 'Build a script that takes two numbers and performs addition, subtraction, multiplication, or division using conditions.', ARRAY['Python'], 'Beginner', '25 mins'),
+('Check Even or Odd Number', 'Python Logic', 'Write a program that takes an integer input from the user and checks if it is even or odd using the modulo (%) operator.', ARRAY['Python'], 'Beginner', '15 mins'),
+
+-- HTML Tasks
+('Create a Basic Webpage', 'HTML Markup', 'Create an HTML page featuring an <h1> title, introduction paragraphs, and a bulleted list of your favorite topics.', ARRAY['HTML'], 'Beginner', '20 mins'),
+('Add an Image and Clickable Links', 'HTML Markup', 'Add your profile picture using the <img> tag and create clickable links to your favorite websites using <a>.', ARRAY['HTML'], 'Beginner', '15 mins'),
+('Create a Simple Contact Form', 'HTML Markup', 'Build an HTML <form> with input fields for Name, Email, and Message, complete with a submit button.', ARRAY['HTML'], 'Beginner', '20 mins'),
+
+-- CSS Tasks
+('Change Background & Text Colors', 'CSS Styling', 'Style a webpage with a custom background color, high-contrast dark text, and modern font families.', ARRAY['CSS'], 'Beginner', '15 mins'),
+('Style a Modern Button with Hover', 'CSS Styling', 'Create a rounded button with custom padding, background color, and a smooth hover transition effect.', ARRAY['CSS'], 'Beginner', '20 mins'),
+('Create a Simple Card with Flexbox', 'CSS Styling', 'Design a clean card container with borders, padding, and centered content using display: flex.', ARRAY['CSS'], 'Beginner', '25 mins'),
+
+-- JavaScript Tasks
+('Display a Welcome Alert Pop-up', 'JavaScript Basics', 'Write a simple JavaScript function that shows a welcome alert dialog when the webpage is opened.', ARRAY['JavaScript'], 'Beginner', '15 mins'),
+('Create a Button Click Counter', 'JavaScript Basics', 'Add a button on your webpage and write an event listener that counts and displays how many times it was clicked.', ARRAY['JavaScript'], 'Beginner', '20 mins'),
+('Validate a Simple Form Input', 'JavaScript Basics', 'Use JavaScript to check if an input field is empty before form submission, and show a helpful warning message.', ARRAY['JavaScript'], 'Beginner', '25 mins'),
+
+-- Multi-skill Tasks
+('Style an HTML Profile Card', 'HTML & CSS', 'Combine HTML structure and CSS styling to build a responsive profile card with a picture, bio, and social button.', ARRAY['HTML', 'CSS'], 'Beginner', '30 mins'),
+('Interactive Color Switcher Button', 'Frontend Web', 'Build a button that changes the webpage background color dynamically between light and dark modes when clicked.', ARRAY['HTML', 'CSS', 'JavaScript'], 'Beginner', '30 mins')
 ON CONFLICT DO NOTHING;
+
+-- ==========================================================
+-- SEED DATA: Small & Practical Beginner Projects
+-- ==========================================================
+INSERT INTO public.projects (title, description, required_skills, difficulty, implementation_steps, expected_outcome) VALUES
+(
+    'Personal Portfolio Webpage',
+    'A clean, modern single-page website to introduce yourself, highlight your skills, and share your contact links.',
+    ARRAY['HTML', 'CSS'],
+    'Beginner',
+    ARRAY[
+        'Create index.html with sections: Header, About Me, Skills, and Contact Info.',
+        'Add your profile picture and clickable links to your social profiles.',
+        'Create style.css to add colors, clean fonts, card borders, and padding.',
+        'Use CSS Flexbox to organize your skills and social buttons neatly.'
+    ],
+    'A responsive personal website that you can share with friends and recruiters.'
+),
+(
+    'Simple Calculator',
+    'An easy-to-use calculator program that accepts two numbers and performs basic arithmetic operations (+, -, *, /).',
+    ARRAY['Python'],
+    'Beginner',
+    ARRAY[
+        'Prompt the user for input: first number, arithmetic operator, and second number.',
+        'Convert string inputs into numbers (float or int).',
+        'Use if, elif, and else conditions to perform the chosen calculation.',
+        'Handle division by zero with a friendly error message.',
+        'Print the calculation result clearly on the screen.'
+    ],
+    'A working calculator that accurately computes math operations and handles errors gracefully.'
+),
+(
+    'To-Do List',
+    'An interactive task organizer where students can add daily study tasks, mark them done, or delete them.',
+    ARRAY['HTML', 'CSS', 'JavaScript'],
+    'Beginner',
+    ARRAY[
+        'Build the HTML layout with an <input> text box and an "Add Task" <button>.',
+        'Style the task container, input box, and list items with clean padding and rounded corners in CSS.',
+        'Add a JavaScript event listener to the button to read the input value when clicked.',
+        'Use JavaScript DOM manipulation (document.createElement) to append the new task to the list.',
+        'Allow users to click on a task item to mark it completed or remove it.'
+    ],
+    'A functional to-do application running in your browser that dynamically creates and manages tasks.'
+),
+(
+    'Basic Quiz Application',
+    'A fun multiple-choice quiz that presents questions one by one, verifies answers, and displays your final score.',
+    ARRAY['Python'],
+    'Beginner',
+    ARRAY[
+        'Define a list of 3-5 beginner computer questions with options and answer keys.',
+        'Loop through the questions and display them sequentially to the user.',
+        'Collect user choices and check them against the answer key using conditions.',
+        'Track the score count for each correct answer.',
+        'Print the final score at the end with a personalized feedback message.'
+    ],
+    'An interactive quiz game that tests knowledge and displays a final percentage score.'
+),
+(
+    'Simple Registration Form',
+    'A user-friendly registration card with inputs for student name, email, password, and target role.',
+    ARRAY['HTML', 'CSS'],
+    'Beginner',
+    ARRAY[
+        'Construct an HTML form with <label> and <input> tags for Name, Email, Password, and a dropdown for Student Year.',
+        'Center the form on the screen using CSS Flexbox.',
+        'Add subtle borders, padding, focus outlines, and a stylish submit button with hover effects.',
+        'Use HTML5 validation attributes (required, type="email") to ensure clean input.'
+    ],
+    'A polished, modern registration form card that looks like a real SaaS sign-up page.'
+)
+ON CONFLICT (title) DO NOTHING;

@@ -1,103 +1,152 @@
 {% extends "base.html" %}
 
-{% block title %}4. AI Project Recommendations & Evidence | SkillLens{% endblock %}
+{% block title %}3. Beginner Projects & Proof | SkillLens{% endblock %}
 
 {% block content %}
 <div class="container">
+  
   <!-- Header -->
   <div style="margin-bottom: 2rem;">
-    <span class="badge badge-primary">Feature 4</span>
-    <h1 style="font-size: 2rem; font-weight: 800; margin-top: 0.5rem;">AI Project Recommendations & Evidence</h1>
-    <p style="color: #64748b; font-size: 1.05rem;">
-      Hiring teams value GitHub repositories over resumes. Below are AI-tailored projects targeting your missing skills for <strong>{{ target_role }}</strong>.
-    </p>
-  </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <span class="pill pill-brand" style="margin-bottom: 0.5rem;">Step 3: Mini Projects & Proof</span>
+        <h1 style="font-size: 2.2rem; font-weight: 800; margin-top: 0.35rem; color: var(--text-navy);">
+          Beginner Projects for Your Skills
+        </h1>
+        <p style="color: var(--text-muted); font-size: 1.05rem;">
+          Showing projects achievable with your selected skills:
+          {% if user_skills %}
+            {% for s in user_skills %}
+              <span class="pill pill-brand" style="margin-left: 0.2rem;">{{ s }}</span>
+            {% endfor %}
+          {% else %}
+            <span style="color: var(--danger); font-weight: 600;">(No skills selected yet)</span>
+          {% endif %}
+        </p>
+      </div>
 
-  <!-- AI Recommended Projects Grid -->
-  <div style="margin-bottom: 2.5rem;">
-    <h2 style="font-size: 1.35rem; font-weight: 800; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-      <span>💡 Recommended Projects to Close Skill Gaps</span>
-      <span class="badge badge-primary">AI Generated</span>
-    </h2>
-
-    <div class="grid-3">
-      {% for proj in recommended_projects %}
-        <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; border-top: 4px solid var(--primary);">
-          <div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-              <span class="badge badge-warning">{{ proj.difficulty }}</span>
-              <span class="badge badge-primary">Target: {{ proj.target_skill }}</span>
-            </div>
-
-            <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; color: #0f172a;">
-              {{ proj.title }}
-            </h3>
-
-            <p style="font-size: 0.9rem; color: #475569; margin-bottom: 1rem;">
-              {{ proj.description }}
-            </p>
-
-            <!-- Deliverables -->
-            <div style="margin-bottom: 1rem;">
-              <strong style="font-size: 0.85rem; color: #64748b;">Key Deliverables:</strong>
-              <ul style="padding-left: 1.2rem; font-size: 0.85rem; color: #334155; margin-top: 0.25rem;">
-                {% for d in proj.deliverables %}
-                  <li>{{ d }}</li>
-                {% endfor %}
-              </ul>
-            </div>
-          </div>
-
-          <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border);">
-            <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.5rem;">
-              ⭐ <em>{{ proj.portfolio_value }}</em>
-            </div>
-            <button type="button" onclick="prefillProject('{{ proj.title|escape }}', '{{ proj.target_skill|escape }}')" class="btn btn-outline btn-sm" style="width: 100%;">
-              Submit Evidence for this &darr;
-            </button>
-          </div>
-        </div>
-      {% endfor %}
+      <div>
+        <a href="{{ url_for('skills') }}" class="btn btn-outline btn-sm">
+          ✏️ Edit Selected Skills
+        </a>
+      </div>
     </div>
   </div>
 
-  <!-- Evidence Submission Form -->
-  <div class="card" style="margin-bottom: 2.5rem; border: 1.5px solid var(--primary); background: #ffffff;">
-    <h2 style="font-size: 1.35rem; font-weight: 800; margin-bottom: 0.25rem; color: var(--primary);">
-      📤 Submit Your Project Evidence (Proof of Work)
+  <!-- Projects Grid -->
+  {% if projects %}
+    <div class="grid-2" style="margin-bottom: 3.5rem;">
+      {% for proj in projects %}
+        <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; border-top: 5px solid var(--primary-blue);">
+          <div>
+            
+            <!-- Top Badges -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+              <span class="pill pill-brand" style="font-size: 0.75rem;">
+                {{ proj.difficulty }}
+              </span>
+              <div style="display: flex; gap: 0.3rem;">
+                {% for req in proj.required_skills %}
+                  <span class="pill pill-success" style="font-size: 0.75rem;">
+                    {{ req }}
+                  </span>
+                {% endfor %}
+              </div>
+            </div>
+
+            <!-- Title & Description -->
+            <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--text-navy); margin-bottom: 0.5rem;">
+              {{ proj.title }}
+            </h3>
+
+            <p style="color: var(--text-body); font-size: 0.93rem; margin-bottom: 1.25rem; line-height: 1.5;">
+              {{ proj.description }}
+            </p>
+
+            <!-- Implementation Steps -->
+            <div style="background: #f8fafc; padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); margin-bottom: 1rem;">
+              <strong style="font-size: 0.85rem; color: var(--text-navy); display: block; margin-bottom: 0.5rem;">
+                🛠️ Simple Implementation Steps:
+              </strong>
+              <ol style="padding-left: 1.25rem; font-size: 0.88rem; color: var(--text-body); display: flex; flex-direction: column; gap: 0.4rem;">
+                {% for step in proj.steps %}
+                  <li>{{ step }}</li>
+                {% endfor %}
+              </ol>
+            </div>
+
+            <!-- Expected Outcome -->
+            <div style="background: #ecfdf5; padding: 0.75rem 1rem; border-radius: var(--radius-sm); border: 1px solid #a7f3d0; margin-bottom: 1rem;">
+              <span style="font-size: 0.8rem; font-weight: 700; color: #065f46; text-transform: uppercase;">Expected Outcome:</span>
+              <p style="font-size: 0.88rem; color: #065f46; margin-top: 0.2rem;">
+                ✓ {{ proj.expected_outcome }}
+              </p>
+            </div>
+
+          </div>
+
+          <!-- Card Bottom Action -->
+          <div style="padding-top: 1rem; border-top: 1px solid var(--border-color);">
+            <button type="button" onclick="prefillProject('{{ proj.title|escape }}', '{{ proj.required_skills|join(', ') }}')" class="btn btn-outline btn-sm" style="width: 100%;">
+              Submit GitHub Proof for This Project &darr;
+            </button>
+          </div>
+
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card" style="text-align: center; padding: 3rem 1.5rem; margin-bottom: 3.5rem;">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">🚀</div>
+      <h3 style="font-size: 1.4rem; font-weight: 700; color: var(--text-navy); margin-bottom: 0.5rem;">
+        No Projects Match Your Current Selection
+      </h3>
+      <p style="color: var(--text-muted); max-width: 550px; margin: 0 auto 1.5rem auto;">
+        You can build a Simple Calculator or Quiz with <strong>Python</strong>, or build a Personal Portfolio Webpage with <strong>HTML and CSS</strong>!
+      </p>
+      <a href="{{ url_for('skills') }}" class="btn btn-primary">
+        Update My Skills &rarr;
+      </a>
+    </div>
+  {% endif %}
+
+  <!-- Evidence Submission Card -->
+  <div class="card" id="submitEvidenceSection" style="margin-bottom: 3.5rem; border: 1.5px solid var(--primary-blue);">
+    <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--text-navy); margin-bottom: 0.25rem;">
+      📤 Submit Your Project Evidence (GitHub Proof)
     </h2>
-    <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 1.5rem;">
-      Paste your public GitHub repository link. Submitting verified projects directly boosts your Internship Readiness Index score!
+    <p style="color: var(--text-muted); font-size: 0.92rem; margin-bottom: 1.5rem;">
+      Hiring teams love seeing working code! Submit your public GitHub repository URL to prove your skills.
     </p>
 
     <form action="{{ url_for('projects') }}" method="POST">
       <div class="grid-2">
         <div class="form-group">
           <label class="form-label" for="projectTitleInput">Project Title *</label>
-          <input type="text" id="projectTitleInput" name="project_title" class="form-control" placeholder="e.g. Pandas Data Cleaner Pipeline" required>
+          <input type="text" id="projectTitleInput" name="project_title" class="form-control" placeholder="e.g. Personal Portfolio Webpage" required>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="targetSkillInput">Primary Skill Proved *</label>
-          <input type="text" id="targetSkillInput" name="target_skill" class="form-control" placeholder="e.g. Pandas, Scikit-Learn, Flask" required>
+          <label class="form-label" for="targetSkillInput">Skills Proved *</label>
+          <input type="text" id="targetSkillInput" name="target_skill" class="form-control" placeholder="e.g. HTML, CSS" required>
         </div>
       </div>
 
       <div class="grid-2">
         <div class="form-group">
           <label class="form-label" for="githubUrlInput">Public GitHub Repository Link *</label>
-          <input type="url" id="githubUrlInput" name="github_url" class="form-control" placeholder="https://github.com/username/project-repo" required>
+          <input type="url" id="githubUrlInput" name="github_url" class="form-control" placeholder="https://github.com/username/portfolio" required>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="liveUrlInput">Live Demo or Colab / Video Link (Optional)</label>
-          <input type="url" id="liveUrlInput" name="live_url" class="form-control" placeholder="https://colab.research.google.com/... or https://...">
+          <label class="form-label" for="liveUrlInput">Live Demo Link (Optional)</label>
+          <input type="url" id="liveUrlInput" name="live_url" class="form-control" placeholder="https://username.github.io/...">
         </div>
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="projectDescInput">Short Description / Learnings</label>
-        <textarea id="projectDescInput" name="description" class="form-control" rows="2" placeholder="Briefly describe what you built and any obstacles you solved..."></textarea>
+        <label class="form-label" for="projectDescInput">Short Note on What You Learned</label>
+        <textarea id="projectDescInput" name="description" class="form-control" rows="2" placeholder="Briefly describe what was easy, what was tricky, and how you solved it..."></textarea>
       </div>
 
       <button type="submit" class="btn btn-primary" style="font-size: 1rem; padding: 0.75rem 2rem;">
@@ -106,24 +155,23 @@
     </form>
   </div>
 
-  <!-- Submitted Evidence List -->
-  <div class="card">
-    <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem;">
-      Your Submitted Evidence Portfolio ({{ submitted_evidence|length }})
-    </h3>
-
-    {% if submitted_evidence %}
+  <!-- Submitted Proof List -->
+  {% if submitted_evidence %}
+    <div class="card" style="margin-bottom: 3.5rem;">
+      <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--text-navy); margin-bottom: 1rem;">
+        Your Submitted Evidence Portfolio ({{ submitted_evidence|length }})
+      </h3>
       <div style="display: flex; flex-direction: column; gap: 0.75rem;">
         {% for item in submitted_evidence %}
-          <div style="padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: #f8fafc; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div style="padding: 1rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: #f8fafc; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
             <div>
               <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <strong style="font-size: 1.05rem; color: #0f172a;">{{ item.project_title }}</strong>
-                <span class="badge badge-success">{{ item.status }}</span>
-                <span class="badge badge-primary">{{ item.target_skill }}</span>
+                <strong style="color: var(--text-navy); font-size: 1.05rem;">{{ item.project_title }}</strong>
+                <span class="pill pill-success" style="font-size: 0.75rem;">{{ item.status }}</span>
+                <span class="pill pill-brand" style="font-size: 0.75rem;">{{ item.target_skill }}</span>
               </div>
-              <p style="font-size: 0.85rem; color: #64748b; margin-top: 0.25rem;">
-                {{ item.description or 'Evidence link submitted for internship readiness proof.' }}
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.35rem;">
+                {{ item.description or 'Submitted project evidence for internship readiness.' }}
               </p>
             </div>
             <div style="display: flex; gap: 0.5rem;">
@@ -139,26 +187,90 @@
           </div>
         {% endfor %}
       </div>
-    {% else %}
-      <div style="text-align: center; padding: 2rem; background: #f8fafc; border-radius: var(--radius-sm);">
-        <p style="color: #64748b; font-size: 0.95rem;">No evidence submissions yet. Select an AI project above and submit your repository link!</p>
+    </div>
+  {% endif %}
+
+  <!-- ==========================================================
+       SECTION 5: RECOMMENDED NEXT SKILLS TO LEARN
+       ========================================================== -->
+  <div class="card" style="border: 2px solid var(--accent-violet); background: linear-gradient(180deg, #ffffff 0%, #faf8ff 100%); margin-bottom: 3rem;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
+      <div>
+        <span class="pill pill-violet" style="margin-bottom: 0.5rem;">Dynamic Recommendation</span>
+        <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-navy); margin-top: 0.25rem;">
+          💡 Recommended Next Skills to Learn
+        </h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">
+          Based on your current skill set: <strong>{{ user_skills|join(', ') if user_skills else 'None' }}</strong>
+        </p>
       </div>
-    {% endif %}
+
+      <div style="text-align: right;">
+        <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Next Skill</span>
+        <div style="font-size: 1.4rem; font-weight: 800; color: var(--accent-violet);">
+          {{ next_skills.primary_next_skill }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Why Useful Box -->
+    <div style="background: #ffffff; padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid #ddd6fe; margin-bottom: 1.5rem;">
+      <h3 style="font-size: 1rem; font-weight: 700; color: var(--accent-violet); margin-bottom: 0.35rem;">
+        🌟 Why learn {{ next_skills.primary_next_skill }} next?
+      </h3>
+      <p style="color: var(--text-body); font-size: 0.95rem; line-height: 1.6;">
+        {{ next_skills.why_useful }}
+      </p>
+    </div>
+
+    <div class="grid-2">
+      <!-- Basic Topics to Learn -->
+      <div style="background: #ffffff; padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+        <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-navy); margin-bottom: 0.75rem;">
+          📚 Basic Topics You Should Learn:
+        </h4>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem;">
+          {% for topic in next_skills.basic_topics %}
+            <li style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--text-body);">
+              <span style="color: var(--accent-violet); font-weight: 800;">✓</span>
+              <span>{{ topic }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <!-- Suggested Learning Order -->
+      <div style="background: #ffffff; padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+        <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-navy); margin-bottom: 0.75rem;">
+          🗺️ Suggested Learning Order:
+        </h4>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+          {% for step in next_skills.learning_order %}
+            <div style="padding: 0.45rem 0.75rem; background: #f8fafc; border-radius: var(--radius-sm); border: 1px solid var(--border-color); font-size: 0.88rem; font-weight: 500; color: var(--text-navy);">
+              {{ step }}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
   </div>
 
-  <!-- Next Step CTA -->
-  <div style="margin-top: 2rem; text-align: center;">
-    <a href="{{ url_for('readiness') }}" class="btn btn-primary" style="font-size: 1.05rem; padding: 0.8rem 2rem;">
-      Step 5: View 30-Day Learning Plan & Final Readiness Report &rarr;
+  <!-- Bottom CTA -->
+  <div style="text-align: center; margin-bottom: 2rem;">
+    <a href="{{ url_for('readiness') }}" class="btn btn-primary btn-lg">
+      Step 4: View Your Internship Readiness Report & 30-Day Plan &rarr;
     </a>
   </div>
+
 </div>
 
 <script>
-  function prefillProject(title, skill) {
+  function prefillProject(title, skills) {
     document.getElementById('projectTitleInput').value = title;
-    document.getElementById('targetSkillInput').value = skill;
-    document.getElementById('projectTitleInput').scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('targetSkillInput').value = skills;
+    document.getElementById('submitEvidenceSection').scrollIntoView({ behavior: 'smooth' });
     document.getElementById('githubUrlInput').focus();
   }
 </script>

@@ -30,7 +30,7 @@
             <li><a href="{{ url_for('skills') }}" class="nav-link {% if request.endpoint == 'skills' %}active{% endif %}">1. Skills</a></li>
             <li><a href="{{ url_for('tasks') }}" class="nav-link {% if request.endpoint == 'tasks' %}active{% endif %}">2. Tasks</a></li>
             <li><a href="{{ url_for('gap_analysis') }}" class="nav-link {% if request.endpoint == 'gap_analysis' %}active{% endif %}">3. Gap Analysis</a></li>
-            <li><a href="{{ url_for('projects') }}" class="nav-link {% if request.endpoint == 'projects' %}active{% endif %}">4. AI Projects</a></li>
+            <li><a href="{{ url_for('projects') }}" class="nav-link {% if request.endpoint == 'projects' %}active{% endif %}">4. Projects</a></li>
             <li><a href="{{ url_for('readiness') }}" class="nav-link {% if request.endpoint == 'readiness' %}active{% endif %}">5. Readiness Plan</a></li>
             <li><a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm">Log Out</a></li>
           {% else %}

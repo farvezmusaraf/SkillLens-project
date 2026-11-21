@@ -1,67 +1,93 @@
 {% extends "base.html" %}
 
-{% block title %}1. Select Your Skills | SkillLens{% endblock %}
+{% block title %}1. Select Your Beginner Skills | SkillLens{% endblock %}
 
 {% block content %}
-<div class="container" style="max-width: 900px;">
+<div class="container" style="max-width: 960px;">
+  
   <!-- Header -->
-  <div style="margin-bottom: 1.5rem;">
-    <span class="badge badge-primary">Feature 1</span>
-    <h1 style="font-size: 2rem; font-weight: 800; margin-top: 0.5rem;">Select Your Existing Skills</h1>
-    <p style="color: #64748b;">
-      Check off the programming languages, frameworks, and tools you have learned so far in your BTech coursework or self-study.
+  <div style="margin-bottom: 2rem; text-align: center;">
+    <span class="pill pill-brand" style="margin-bottom: 0.5rem;">Step 1: Skill Selection</span>
+    <h1 style="font-size: 2.2rem; font-weight: 800; margin-top: 0.35rem; color: var(--text-navy);">
+      Choose Your Beginner Skills
+    </h1>
+    <p style="color: var(--text-muted); font-size: 1.05rem; max-width: 650px; margin: 0.5rem auto 0 auto;">
+      SkillLens focuses on the 4 essential foundations. Select the skills you are learning, and we'll instantly show you what you can build!
     </p>
   </div>
 
-  <!-- Search & Filter Bar -->
-  <div class="card" style="margin-bottom: 1.5rem; padding: 1rem 1.5rem;">
-    <div style="display: flex; gap: 1rem; align-items: center;">
-      <span style="font-size: 1.2rem;">🔍</span>
-      <input type="text" id="skillSearchInput" class="form-control" placeholder="Search skills (e.g. Python, SQL, Git, Pandas)...">
-    </div>
-  </div>
-
-  <!-- Skills Form -->
+  <!-- Form -->
   <form action="{{ url_for('skills') }}" method="POST">
-    {% for category, skill_list in categories.items() %}
-      <div class="card" style="margin-bottom: 1.5rem;">
-        <h3 style="font-size: 1.15rem; font-weight: 700; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; margin-bottom: 1rem; display: flex; justify-content: space-between;">
-          <span>{{ category }}</span>
-          <span style="font-size: 0.85rem; color: #64748b; font-weight: 500;">{{ skill_list|length }} options</span>
-        </h3>
+    
+    <!-- 4 Core Skills Grid -->
+    <div class="grid-2" style="margin-bottom: 2rem;">
+      {% for s in skills %}
+        {% set is_selected = s.name in user_skills %}
+        <div class="card" style="border: 2px solid {% if is_selected %}var(--primary-blue){% else %}var(--border-color){% endif %}; background: {% if is_selected %}#f8faff{% else %}#ffffff{% endif %}; transition: all 0.2s ease; position: relative;">
+          
+          <label style="cursor: pointer; display: block;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span style="font-size: 2rem;">
+                  {% if s.name == 'Python' %}🐍
+                  {% elif s.name == 'HTML' %}🌐
+                  {% elif s.name == 'CSS' %}🎨
+                  {% elif s.name == 'JavaScript' %}⚡
+                  {% else %}💻{% endif %}
+                </span>
+                <div>
+                  <h3 style="font-size: 1.35rem; font-weight: 800; color: var(--text-navy); margin-bottom: 0.15rem;">
+                    {{ s.name }}
+                  </h3>
+                  <span class="pill pill-brand" style="font-size: 0.75rem; padding: 0.15rem 0.6rem;">
+                    {{ s.category }}
+                  </span>
+                </div>
+              </div>
 
-        <div class="skill-checkbox-grid">
-          {% for s in skill_list %}
-            <label class="skill-tag-label">
-              <input type="checkbox" name="selected_skills" value="{{ s.name }}" {% if s.name in user_skills %}checked{% endif %}>
-              <span>{{ s.name }}</span>
-            </label>
-          {% endfor %}
+              <!-- Checkbox -->
+              <input type="checkbox" name="selected_skills" value="{{ s.name }}" {% if is_selected %}checked{% endif %} style="width: 22px; height: 22px; accent-color: var(--primary-blue); cursor: pointer; margin-top: 4px;">
+            </div>
+
+            <p style="color: var(--text-muted); font-size: 0.92rem; margin-bottom: 1.25rem; line-height: 1.5;">
+              {{ s.description }}
+            </p>
+
+            <!-- Beginner Subtopics -->
+            <div style="background: #f8fafc; padding: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+              <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; display: block; margin-bottom: 0.5rem;">
+                Beginner Topics Included:
+              </span>
+              <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+                {% for sub in s.subtopics %}
+                  <span class="pill" style="background: #ffffff; border: 1px solid #cbd5e1; color: var(--text-navy); font-size: 0.8rem; padding: 0.25rem 0.65rem;">
+                    • {{ sub }}
+                  </span>
+                {% endfor %}
+              </div>
+            </div>
+          </label>
+
         </div>
-      </div>
-    {% endfor %}
-
-    <!-- Custom Skill Input -->
-    <div class="card" style="margin-bottom: 2rem;">
-      <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem;">Don't see a skill you know?</h3>
-      <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 1rem;">
-        Type any library, tool, or language here to add it to your profile.
-      </p>
-      <div style="display: flex; gap: 0.75rem;">
-        <input type="text" name="custom_skill" class="form-control" placeholder="e.g. Django, LangChain, Linux CLI, Seaborn">
-      </div>
+      {% endfor %}
     </div>
 
-    <!-- Save & Continue CTA -->
-    <div style="position: sticky; bottom: 1.5rem; background: var(--bg-card); padding: 1rem 1.5rem; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-lg); display: flex; justify-content: space-between; align-items: center;">
+    <!-- Sticky Bottom CTA -->
+    <div class="card" style="position: sticky; bottom: 1.5rem; border: 1.5px solid var(--primary-blue); box-shadow: var(--shadow-hover); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; z-index: 10;">
       <div>
-        <span style="font-weight: 600; font-size: 0.95rem;">Ready to discover what you can build?</span>
-        <p style="color: #64748b; font-size: 0.85rem;">Saving will instantly unlock your matched practical tasks.</p>
+        <strong style="color: var(--text-navy); font-size: 1.05rem; display: block;">
+          Select your skills and continue
+        </strong>
+        <span style="color: var(--text-muted); font-size: 0.88rem;">
+          Currently selected: <strong>{{ user_skills|length }} of 4 skills</strong> ({{ user_skills|join(', ') if user_skills else 'None yet' }})
+        </span>
       </div>
-      <button type="submit" class="btn btn-primary" style="font-size: 1rem; padding: 0.75rem 1.75rem;">
-        Save Skills & Discover Tasks &rarr;
+      <button type="submit" class="btn btn-primary btn-lg">
+        Save Skills & View Matching Tasks &rarr;
       </button>
     </div>
+
   </form>
+
 </div>
 {% endblock %}

@@ -1,14 +1,13 @@
 """
-AI Recommendation Service.
-Uses Google Gemini API or intelligent algorithmic templates to generate:
-1. Tailored project recommendations targeting missing skills.
-2. A structured 30-day learning and proof-building roadmap.
+AI Recommendation Service for SkillLens.
+Uses Google Gemini API or intelligent curated fallback templates to generate:
+1. Beginner project ideas tailored strictly to the student's skills.
+2. A structured, realistic 30-day learning roadmap for first-year engineers.
 """
 import json
 from typing import List, Dict, Any
 from .config import GEMINI_API_KEY, is_gemini_configured
 
-# Try importing google-genai
 GENAI_AVAILABLE = False
 try:
     from google import genai
@@ -19,32 +18,28 @@ except ImportError:
 
 def generate_project_recommendations(target_role: str, missing_skills: List[str], user_skills: List[str]) -> List[Dict[str, Any]]:
     """
-    Generates 2-3 project recommendations specifically designed to help the student learn
-    missing skills and build portfolio evidence.
+    Returns beginner-friendly projects based on the user's selected skills.
     """
-    # If Gemini is configured and client available, attempt dynamic AI generation
     if is_gemini_configured() and GENAI_AVAILABLE:
         try:
             client = genai.Client(api_key=GEMINI_API_KEY)
             prompt = f"""
-You are an expert AI career mentor for university students.
-The student is aiming for the role of: "{target_role}".
-They currently know: {', '.join(user_skills) if user_skills else 'Basic programming'}.
-Their skill gaps to bridge are: {', '.join(missing_skills) if missing_skills else 'Advanced best practices'}.
-
-Generate exactly 3 hands-on, realistic, portfolio-worthy project ideas that bridge these gaps.
+You are a friendly computer science mentor for a first-year BTech student.
+The student knows these beginner skills: {', '.join(user_skills) if user_skills else 'Beginner coding'}.
+Their target track is: "{target_role}".
+Suggest 2-3 small, beginner-friendly projects they can build right now using their skills.
 Return ONLY valid JSON matching this schema:
 [
   {{
     "title": "Project Title",
-    "target_skill": "Primary missing skill addressed",
-    "difficulty": "Beginner | Intermediate",
-    "description": "2-3 sentences explaining what the project does.",
+    "target_skill": "Primary skill used",
+    "difficulty": "Beginner",
+    "description": "Short 1-2 sentence description.",
     "deliverables": ["Step 1", "Step 2", "Step 3"],
-    "portfolio_value": "Why recruiters will love this on GitHub"
+    "portfolio_value": "Why this is great for a beginner GitHub portfolio"
   }}
 ]
-Do not include markdown code block markers like ```json, just raw JSON.
+Do not include markdown code block markers.
 """
             response = client.models.generate_content(
                 model='gemini-2.5-flash',
@@ -57,187 +52,152 @@ Do not include markdown code block markers like ```json, just raw JSON.
             if isinstance(projects, list) and len(projects) > 0:
                 return projects
         except Exception as e:
-            # Fall back gracefully to curated template generator
             print(f"[AI Service] Gemini call fallback: {e}")
 
-    # Curated Smart Algorithmic Generator
-    return _generate_curated_projects(target_role, missing_skills, user_skills)
+    return _generate_curated_projects(user_skills)
 
 
 def generate_30_day_plan(target_role: str, missing_skills: List[str], user_skills: List[str], readiness_score: int) -> Dict[str, Any]:
     """
-    Generates a structured 30-day (4-week) learning and evidence roadmap.
+    Generates a beginner-friendly 30-day sprint plan.
     """
-    if is_gemini_configured() and GENAI_AVAILABLE:
-        try:
-            client = genai.Client(api_key=GEMINI_API_KEY)
-            prompt = f"""
-You are a senior tech mentor for university students.
-Role: "{target_role}".
-Readiness Score: {readiness_score}%.
-Current Skills: {', '.join(user_skills) if user_skills else 'None specified'}.
-Missing Skills: {', '.join(missing_skills) if missing_skills else 'Deepening practical projects'}.
-
-Create a 30-day learning & portfolio sprint broken into 4 weeks.
-Return ONLY valid JSON with this exact structure:
-{{
-  "overview": "Encouraging summary for the 30-day journey.",
-  "weeks": [
-    {{
-      "week_number": 1,
-      "theme": "Week 1 Theme Title",
-      "goal": "Clear objective",
-      "days": [
-        {{"day_range": "Days 1-3", "task": "Actionable task"}},
-        {{"day_range": "Days 4-7", "task": "Actionable task"}}
-      ],
-      "milestone": "End of week proof / deliverable"
-    }},
-    {{
-      "week_number": 2,
-      "theme": "Week 2 Theme Title",
-      "goal": "Clear objective",
-      "days": [
-        {{"day_range": "Days 8-11", "task": "Actionable task"}},
-        {{"day_range": "Days 12-14", "task": "Actionable task"}}
-      ],
-      "milestone": "End of week proof / deliverable"
-    }},
-    {{
-      "week_number": 3,
-      "theme": "Week 3 Theme Title",
-      "goal": "Clear objective",
-      "days": [
-        {{"day_range": "Days 15-18", "task": "Actionable task"}},
-        {{"day_range": "Days 19-21", "task": "Actionable task"}}
-      ],
-      "milestone": "End of week proof / deliverable"
-    }},
-    {{
-      "week_number": 4,
-      "theme": "Week 4 Theme Title",
-      "goal": "Clear objective",
-      "days": [
-        {{"day_range": "Days 22-25", "task": "Actionable task"}},
-        {{"day_range": "Days 26-30", "task": "Actionable task"}}
-      ],
-      "milestone": "End of week proof / deliverable"
-    }}
-  ]
-}}
-Do not include markdown code block markers.
-"""
-            response = client.models.generate_content(
-                model='gemini-2.5-flash',
-                contents=prompt,
-            )
-            text = response.text.strip()
-            if text.startswith("```"):
-                text = text.strip("`").replace("json\n", "", 1).strip()
-            plan = json.loads(text)
-            if isinstance(plan, dict) and 'weeks' in plan:
-                return plan
-        except Exception as e:
-            print(f"[AI Service] Gemini plan fallback: {e}")
-
-    # Curated Smart Algorithmic Generator
-    return _generate_curated_plan(target_role, missing_skills, user_skills, readiness_score)
-
-
-# -------------------------------------------------------------
-# Curated High-Quality Fallbacks (Ensures 100% Offline Hackathon Reliability)
-# -------------------------------------------------------------
-
-def _generate_curated_projects(target_role: str, missing_skills: List[str], user_skills: List[str]) -> List[Dict[str, Any]]:
-    primary_gap = missing_skills[0] if missing_skills else "End-to-End Integration"
-    secondary_gap = missing_skills[1] if len(missing_skills) > 1 else "Automated Testing & Deployment"
-    
-    return [
-        {
-            "title": f"{primary_gap} Practical Showcase Application",
-            "target_skill": primary_gap,
-            "difficulty": "Beginner to Intermediate",
-            "description": f"Build a focused, standalone application demonstrating clean {primary_gap} concepts integrated into a real-world scenario.",
-            "deliverables": [
-                f"Implement core logic utilizing {primary_gap}",
-                "Write comprehensive README with architectural diagrams and run instructions",
-                "Push modular code to a public GitHub repository with informative commits"
-            ],
-            "portfolio_value": f"Proves to hiring managers that you understand real {primary_gap} workflows beyond textbook theory."
-        },
-        {
-            "title": f"Automated {target_role} Pipeline & Dashboard",
-            "target_skill": secondary_gap,
-            "difficulty": "Intermediate",
-            "description": f"Create an end-to-end prototype combining your existing skills with {secondary_gap} to solve a mock industry task.",
-            "deliverables": [
-                f"Combine current foundation with {secondary_gap}",
-                "Include clean input validation and error handling",
-                "Host live on a free platform (GitHub Pages / Render) or record a 60-sec demo GIF"
-            ],
-            "portfolio_value": "Demonstrates product thinking, end-to-end delivery, and documentation skills."
-        },
-        {
-            "title": f"Production-Style Case Study: {target_role} Toolkit",
-            "target_skill": "Full Stack & Documentation",
-            "difficulty": "Beginner",
-            "description": "Construct a curated CLI or web utility that automates a daily pain point for developers or analysts.",
-            "deliverables": [
-                "Modular code structure with separation of concerns",
-                "Unit tests or sample verification scripts",
-                "Well-formatted LICENSE and requirements configuration"
-            ],
-            "portfolio_value": "Shows professional software engineering hygiene, which stands out above 90% of student applicants."
-        }
-    ]
-
-
-def _generate_curated_plan(target_role: str, missing_skills: List[str], user_skills: List[str], readiness_score: int) -> Dict[str, Any]:
-    skill_a = missing_skills[0] if len(missing_skills) > 0 else "Advanced Concepts"
-    skill_b = missing_skills[1] if len(missing_skills) > 1 else "System Design"
+    next_focus = missing_skills[0] if missing_skills else "Building Multi-Skill Projects"
     
     return {
-        "overview": f"Your personalized 30-day roadmap to reach 90%+ readiness for '{target_role}'. Focused on hands-on building and public GitHub proof.",
+        "overview": f"A simple, manageable 30-day learning roadmap tailored for first-year students preparing for '{target_role}'. Spend 45 minutes a day practicing code.",
         "weeks": [
             {
                 "week_number": 1,
-                "theme": f"Foundation Sprint: Mastering {skill_a}",
-                "goal": f"Gain solid theoretical grasp and code 3 mini-exercises in {skill_a}.",
+                "theme": f"Foundation Sprint: {next_focus}",
+                "goal": f"Master basic concepts in {next_focus} with hands-on practice.",
                 "days": [
-                    {"day_range": "Days 1-3", "task": f"Learn core syntax, data models, and standard libraries for {skill_a}."},
-                    {"day_range": "Days 4-7", "task": f"Build 2 small standalone scripts testing edge cases in {skill_a}."}
+                    {"day_range": "Days 1-3", "task": f"Learn the basic syntax and core building blocks of {next_focus}."},
+                    {"day_range": "Days 4-7", "task": f"Code 2 small practice tasks and verify them locally."}
                 ],
-                "milestone": f"A clean public GitHub repo containing documented {skill_a} practice code."
+                "milestone": f"A working folder with your first {next_focus} practice scripts."
             },
             {
                 "week_number": 2,
-                "theme": f"Skill Integration: Tackling {skill_b}",
-                "goal": f"Connect your existing foundation with {skill_b}.",
+                "theme": "Small Project Build",
+                "goal": "Build your first standalone mini-project from scratch.",
                 "days": [
-                    {"day_range": "Days 8-11", "task": f"Complete targeted exercises and official tutorials for {skill_b}."},
-                    {"day_range": "Days 12-14", "task": "Integrate {skill_a} and {skill_b} into a unified workflow."}
+                    {"day_range": "Days 8-11", "task": "Plan the project steps, write the initial code, and test simple inputs."},
+                    {"day_range": "Days 12-14", "task": "Add input validation, clean formatting, and test edge cases."}
                 ],
-                "milestone": "A functional prototype showing both skills working together."
+                "milestone": "A functional project (like a calculator or basic webpage)."
             },
             {
                 "week_number": 3,
-                "theme": "Capstone Project Build: Portfolio Flagship",
-                "goal": f"Build an impressive project specifically targeted at the {target_role} role.",
+                "theme": "Portfolio Presentation & Git",
+                "goal": "Learn basic Git commands and publish your project on GitHub.",
                 "days": [
-                    {"day_range": "Days 15-18", "task": "Architect the project, set up GitHub repository, and code the core engine."},
-                    {"day_range": "Days 19-21", "task": "Add input validation, clean UI/CLI, and clear logging."}
+                    {"day_range": "Days 15-18", "task": "Initialize a Git repository and make your first commit with a clear message."},
+                    {"day_range": "Days 19-21", "task": "Write a clean README.md explaining what your project does and how to run it."}
                 ],
-                "milestone": "Complete working version of your flagship project submitted on SkillLens."
+                "milestone": "A public GitHub repository link submitted on SkillLens."
             },
             {
                 "week_number": 4,
-                "theme": "Polish, Documentation & Internship Applications",
-                "goal": "Transform raw code into a recruiter-ready portfolio presentation.",
+                "theme": "Review & Next Steps",
+                "goal": "Review your progress and explore how your skills connect together.",
                 "days": [
-                    {"day_range": "Days 22-25", "task": "Write an awesome README with demo GIFs, badges, and problem statements."},
-                    {"day_range": "Days 26-30", "task": "Update your LinkedIn / Resume with your evidence links and apply to 5 targeted internships."}
+                    {"day_range": "Days 22-25", "task": "Connect your skills (e.g. style your HTML with CSS or connect Python logic)."},
+                    {"day_range": "Days 26-30", "task": "Submit your evidence link and review your updated readiness score."}
                 ],
-                "milestone": "100% Internship Readiness report with verified evidence links."
+                "milestone": "Full beginner project portfolio completed!"
             }
         ]
     }
+
+
+def _generate_curated_projects(user_skills: List[str]) -> List[Dict[str, Any]]:
+    user_skill_set = set(user_skills)
+    projects = []
+    
+    if 'Python' in user_skill_set:
+        projects.append({
+            "title": "Simple Calculator Application",
+            "target_skill": "Python",
+            "difficulty": "Beginner",
+            "description": "An interactive calculator that takes two numbers and performs addition, subtraction, multiplication, or division with error checks.",
+            "deliverables": [
+                "Prompt user for numbers and operation (+, -, *, /)",
+                "Use if/elif/else conditions to perform math",
+                "Prevent crash on division by zero",
+                "Print clean results on screen"
+            ],
+            "portfolio_value": "Shows you understand basic programming logic, variable conversion, and conditional error handling."
+        })
+        projects.append({
+            "title": "Basic Quiz Application",
+            "target_skill": "Python",
+            "difficulty": "Beginner",
+            "description": "A fun command-line quiz that asks 3-5 multiple-choice questions, verifies user answers, and calculates a final score.",
+            "deliverables": [
+                "Store questions and answer choices in a structured list",
+                "Loop through questions and accept user choices",
+                "Keep score of correct answers",
+                "Display final score and a congratulatory message"
+            ],
+            "portfolio_value": "Demonstrates lists, loops, user input handling, and score tallying."
+        })
+
+    if 'HTML' in user_skill_set and 'CSS' in user_skill_set:
+        projects.append({
+            "title": "Personal Portfolio Webpage",
+            "target_skill": "HTML & CSS",
+            "difficulty": "Beginner",
+            "description": "A clean, modern single-page website to introduce yourself, showcase your hobby projects, and share social links.",
+            "deliverables": [
+                "Create index.html with Header, About Me, Skills, and Contact",
+                "Add your photo and social links using <img> and <a> tags",
+                "Style with CSS colors, fonts, rounded cards, and padding",
+                "Use CSS Flexbox to align buttons and cards neatly"
+            ],
+            "portfolio_value": "Gives you a live digital business card you can share with recruiters and peers."
+        })
+        projects.append({
+            "title": "Simple Registration Form Card",
+            "target_skill": "HTML & CSS",
+            "difficulty": "Beginner",
+            "description": "A clean sign-up card collecting Name, Email, Password, and Role with styled inputs and hover effects.",
+            "deliverables": [
+                "Build form with input fields for Name, Email, Password",
+                "Center form card using CSS Flexbox",
+                "Add button hover effect and input focus outlines",
+                "Enforce HTML5 required fields"
+            ],
+            "portfolio_value": "Demonstrates practical CSS box model, form elements, and UI styling."
+        })
+
+    if 'JavaScript' in user_skill_set and 'HTML' in user_skill_set:
+        projects.append({
+            "title": "Interactive To-Do List",
+            "target_skill": "JavaScript",
+            "difficulty": "Beginner",
+            "description": "A browser app where users can type a task, click 'Add Task', and see it appear in a list with the ability to mark it done.",
+            "deliverables": [
+                "HTML input field and 'Add Task' button",
+                "CSS styling for task items and checkmarks",
+                "JavaScript event listener on button click",
+                "DOM manipulation to add new tasks dynamically"
+            ],
+            "portfolio_value": "The classic, must-have proof that you understand JavaScript events and DOM manipulation."
+        })
+
+    # If no specific match found, provide default starter project
+    if not projects:
+        projects.append({
+            "title": "Personal Bio & Hobbies Webpage",
+            "target_skill": "HTML",
+            "difficulty": "Beginner",
+            "description": "Create your first web page with headings, paragraphs, and a list of your favorite learning topics.",
+            "deliverables": [
+                "Create an index.html file",
+                "Use <h1>, <h2>, and <p> tags for structure",
+                "Add a bulleted list of your favorite hobbies"
+            ],
+            "portfolio_value": "Your very first step into web development!"
+        })
+
+    return projects

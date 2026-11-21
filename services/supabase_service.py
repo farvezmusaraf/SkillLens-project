@@ -2,7 +2,7 @@
 Data and Storage Service for SkillLens.
 Seamlessly integrates with Supabase REST API when credentials are provided,
 and automatically falls back to local SQLite when offline or unconfigured.
-This guarantees the hackathon project runs reliably in all environments!
+Refocused strictly on 4 Core Beginner Skills: Python, HTML, CSS, and JavaScript.
 """
 import os
 import json
@@ -29,7 +29,7 @@ def get_db_connection():
     return conn
 
 def init_local_db():
-    """Seeds the local SQLite database if it hasn't been initialized."""
+    """Seeds and updates the local SQLite database for beginner-focused skills, tasks, and projects."""
     conn = get_db_connection()
     cursor = conn.cursor()
     
@@ -40,7 +40,7 @@ def init_local_db():
             email TEXT UNIQUE,
             password_hash TEXT,
             full_name TEXT NOT NULL,
-            target_role TEXT DEFAULT 'AI & ML Intern',
+            target_role TEXT DEFAULT 'Junior Full-Stack Starter',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
@@ -51,9 +51,16 @@ def init_local_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT UNIQUE,
             category TEXT,
-            description TEXT
+            description TEXT,
+            subtopics TEXT
         )
     ''')
+    
+    # Check if subtopics column exists, add if missing
+    cursor.execute("PRAGMA table_info(skills)")
+    columns = [col[1] for col in cursor.fetchall()]
+    if 'subtopics' not in columns:
+        cursor.execute("ALTER TABLE skills ADD COLUMN subtopics TEXT")
     
     # 3. User Skills
     cursor.execute('''
@@ -81,7 +88,7 @@ def init_local_db():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS tasks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT,
+            title TEXT UNIQUE,
             category TEXT,
             description TEXT,
             required_skills TEXT, -- comma-separated
@@ -90,7 +97,20 @@ def init_local_db():
         )
     ''')
     
-    # 6. Projects & Evidence
+    # 6. Projects Catalog (Beginner)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS projects (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT UNIQUE,
+            description TEXT,
+            required_skills TEXT, -- comma-separated
+            difficulty TEXT,
+            steps TEXT, -- JSON list of steps
+            expected_outcome TEXT
+        )
+    ''')
+    
+    # 7. Projects & Evidence
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS user_projects_evidence (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -105,7 +125,7 @@ def init_local_db():
         )
     ''')
     
-    # 7. Readiness Reports
+    # 8. Readiness Reports
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS readiness_reports (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -117,96 +137,160 @@ def init_local_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+
+    # Seed or Refresh 4 Core Beginner Skills
+    beginner_skills = [
+        ('Python', 'Programming Logic', 'A clean, beginner-friendly language great for logic, problem solving, and automation.',
+         json.dumps(['Variables', 'Data Types', 'Conditions', 'Loops', 'Functions'])),
+        ('HTML', 'Web Structure', 'The foundational skeleton of every website. Used to display headings, paragraphs, and forms.',
+         json.dumps(['Headings', 'Paragraphs', 'Links', 'Images', 'Forms'])),
+        ('CSS', 'Web Styling', 'Adds visual style, colors, fonts, margins, and modern layouts to HTML pages.',
+         json.dumps(['Colors', 'Fonts', 'Margins', 'Padding', 'Flexbox'])),
+        ('JavaScript', 'Web Interactivity', 'Brings web pages to life with interactive buttons, clicks, alerts, and live updates.',
+         json.dumps(['Variables', 'Functions', 'Events', 'DOM Manipulation']))
+    ]
     
-    # Seed default skills if empty
-    cursor.execute('SELECT COUNT(*) FROM skills')
-    if cursor.fetchone()[0] == 0:
-        default_skills = [
-            ('Python', 'Programming', 'Core programming language for AI, data, and scripting'),
-            ('C++', 'Programming', 'High-performance compiled language for algorithms'),
-            ('Java', 'Programming', 'Enterprise object-oriented language'),
-            ('JavaScript', 'Web Development', 'Interactive web scripting and UI logic'),
-            ('HTML/CSS', 'Web Development', 'Essential website structure and styling'),
-            ('Flask', 'Web Development', 'Lightweight Python web framework'),
-            ('FastAPI', 'Web Development', 'Modern Python API framework'),
-            ('NumPy', 'AI & ML', 'Vectorized math and multidimensional arrays'),
-            ('Pandas', 'Data & Database', 'Tabular data analysis and cleaning'),
-            ('Matplotlib & Seaborn', 'Data & Database', 'Statistical plotting and charts'),
-            ('Scikit-Learn', 'AI & ML', 'Machine learning algorithms and pipelines'),
-            ('TensorFlow', 'AI & ML', 'Deep learning and neural network framework'),
-            ('PyTorch', 'AI & ML', 'Dynamic neural network development'),
-            ('OpenCV', 'AI & ML', 'Computer vision and image manipulation'),
-            ('SQL', 'Data & Database', 'Structured database querying'),
-            ('PostgreSQL', 'Data & Database', 'Robust relational database'),
-            ('Git & GitHub', 'Tools & DevOps', 'Version control and portfolio hosting'),
-            ('Docker', 'Tools & DevOps', 'Application containerization')
-        ]
-        cursor.executemany('INSERT INTO skills (name, category, description) VALUES (?, ?, ?)', default_skills)
-        
-        # Seed default role requirements
-        default_roles = [
-            # AI & ML Intern
-            ('AI & ML Intern', 'Python', 'Required'),
-            ('AI & ML Intern', 'NumPy', 'Required'),
-            ('AI & ML Intern', 'Pandas', 'Required'),
-            ('AI & ML Intern', 'Scikit-Learn', 'Required'),
-            ('AI & ML Intern', 'Git & GitHub', 'Required'),
-            ('AI & ML Intern', 'Matplotlib & Seaborn', 'Preferred'),
-            ('AI & ML Intern', 'PyTorch', 'Preferred'),
-            ('AI & ML Intern', 'SQL', 'Preferred'),
-            # Data Analyst Intern
-            ('Data Analyst Intern', 'Python', 'Required'),
-            ('Data Analyst Intern', 'Pandas', 'Required'),
-            ('Data Analyst Intern', 'SQL', 'Required'),
-            ('Data Analyst Intern', 'Matplotlib & Seaborn', 'Required'),
-            ('Data Analyst Intern', 'Git & GitHub', 'Preferred'),
-            ('Data Analyst Intern', 'Scikit-Learn', 'Preferred'),
-            # Python Backend Intern
-            ('Python Backend Intern', 'Python', 'Required'),
-            ('Python Backend Intern', 'Flask', 'Required'),
-            ('Python Backend Intern', 'SQL', 'Required'),
-            ('Python Backend Intern', 'Git & GitHub', 'Required'),
-            ('Python Backend Intern', 'PostgreSQL', 'Preferred'),
-            ('Python Backend Intern', 'Docker', 'Preferred'),
-            # Frontend Developer Intern
-            ('Frontend Developer Intern', 'HTML/CSS', 'Required'),
-            ('Frontend Developer Intern', 'JavaScript', 'Required'),
-            ('Frontend Developer Intern', 'Git & GitHub', 'Required'),
-            # Full Stack Intern
-            ('Full Stack Intern', 'Python', 'Required'),
-            ('Full Stack Intern', 'Flask', 'Required'),
-            ('Full Stack Intern', 'HTML/CSS', 'Required'),
-            ('Full Stack Intern', 'JavaScript', 'Required'),
-            ('Full Stack Intern', 'SQL', 'Required'),
-            ('Full Stack Intern', 'Git & GitHub', 'Required')
-        ]
-        cursor.executemany('INSERT INTO role_requirements (role_name, skill_name, importance) VALUES (?, ?, ?)', default_roles)
-        
-        # Seed default tasks
-        default_tasks = [
-            ('Automated CSV Cleaner & Formatter', 'Data & Scripting', 'Write a Python script that parses messy CSV datasets, strips null values, fixes datatypes, and exports a clean summary.', 'Python,Pandas', 'Beginner', '2 hours'),
-            ('Interactive Weather Web Widget', 'Web Development', 'Build a frontend widget that takes a city name, fetches weather data, and renders animated cards.', 'HTML/CSS,JavaScript', 'Beginner', '3 hours'),
-            ('CLI Student Grade Calculator', 'Programming', 'A command-line tool with clean menu navigation to add students, record marks, and compute GPA.', 'Python', 'Beginner', '1-2 hours'),
-            ('House Price Predictor with Linear Regression', 'AI & Machine Learning', 'Train a supervised regression model on housing dataset to predict prices with metrics (RMSE, R2).', 'Python,NumPy,Pandas,Scikit-Learn', 'Intermediate', '4 hours'),
-            ('Lightweight REST API for a Note-Taking App', 'Web Backend', 'Create CRUD endpoints (Create, Read, Update, Delete) for notes with input validation and JSON responses.', 'Python,Flask', 'Beginner', '3 hours'),
-            ('Exploratory Data Analysis (EDA) on Titanic Dataset', 'Data Science', 'Analyze passenger demographics, plot correlation heatmaps, and discover survival drivers.', 'Python,Pandas,Matplotlib & Seaborn', 'Beginner', '2.5 hours'),
-            ('Image Filter & Face Detection Script', 'Computer Vision', 'Use Haar cascades in OpenCV to detect faces and apply custom filters to photos automatically.', 'Python,OpenCV', 'Intermediate', '3 hours'),
-            ('Full-Stack Task Board with SQLite', 'Full Stack', 'Build a mini-Trello clone with a Flask backend, SQLite database, and HTML/CSS/JS frontend.', 'Python,Flask,HTML/CSS,JavaScript,SQL', 'Intermediate', '6 hours')
-        ]
-        cursor.executemany('INSERT INTO tasks (title, category, description, required_skills, difficulty, estimated_time) VALUES (?, ?, ?, ?, ?, ?)', default_tasks)
-        
-        # Create a default guest student profile
-        demo_user_id = '00000000-0000-0000-0000-000000000001'
-        cursor.execute(
-            'INSERT OR IGNORE INTO profiles (id, email, password_hash, full_name, target_role) VALUES (?, ?, ?, ?, ?)',
-            (demo_user_id, 'demo@student.edu', _hash_password('demo123'), 'Alex Chen', 'AI & ML Intern')
+    # Clear advanced skills and insert ONLY the 4 beginner skills
+    cursor.execute("DELETE FROM skills WHERE name NOT IN ('Python', 'HTML', 'CSS', 'JavaScript')")
+    for s_name, s_cat, s_desc, s_subs in beginner_skills:
+        cursor.execute('''
+            INSERT INTO skills (name, category, description, subtopics)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(name) DO UPDATE SET
+                category=excluded.category,
+                description=excluded.description,
+                subtopics=excluded.subtopics
+        ''', (s_name, s_cat, s_desc, s_subs))
+
+    # Seed Role Requirements
+    default_roles = [
+        ('Junior Full-Stack Starter', 'Python', 'Required'),
+        ('Junior Full-Stack Starter', 'HTML', 'Required'),
+        ('Junior Full-Stack Starter', 'CSS', 'Required'),
+        ('Junior Full-Stack Starter', 'JavaScript', 'Required'),
+        ('Frontend Web Developer (Beginner)', 'HTML', 'Required'),
+        ('Frontend Web Developer (Beginner)', 'CSS', 'Required'),
+        ('Frontend Web Developer (Beginner)', 'JavaScript', 'Required'),
+        ('Frontend Web Developer (Beginner)', 'Python', 'Preferred'),
+        ('Junior Python Developer', 'Python', 'Required'),
+        ('Junior Python Developer', 'HTML', 'Preferred'),
+        ('Junior Python Developer', 'CSS', 'Preferred')
+    ]
+    cursor.execute('DELETE FROM role_requirements')
+    cursor.executemany('INSERT INTO role_requirements (role_name, skill_name, importance) VALUES (?, ?, ?)', default_roles)
+
+    # Seed Small Beginner Tasks
+    beginner_tasks = [
+        # Python Tasks
+        ('Print Your Name and Bio', 'Python Logic', 'Write a Python script using variables and print() to display your name, college, and a short bio.', 'Python', 'Beginner', '15 mins'),
+        ('Create a Simple Calculator', 'Python Logic', 'Build a script that takes two numbers and performs addition, subtraction, multiplication, or division using conditions.', 'Python', 'Beginner', '25 mins'),
+        ('Check Even or Odd Number', 'Python Logic', 'Write a program that takes an integer input from the user and checks if it is even or odd using the modulo (%) operator.', 'Python', 'Beginner', '15 mins'),
+        # HTML Tasks
+        ('Create a Basic Webpage', 'HTML Markup', 'Create an HTML page featuring an <h1> title, introduction paragraphs, and a bulleted list of your favorite topics.', 'HTML', 'Beginner', '20 mins'),
+        ('Add an Image and Clickable Links', 'HTML Markup', 'Add your profile picture using the <img> tag and create clickable links to your favorite websites using <a>.', 'HTML', 'Beginner', '15 mins'),
+        ('Create a Simple Contact Form', 'HTML Markup', 'Build an HTML <form> with input fields for Name, Email, and Message, complete with a submit button.', 'HTML', 'Beginner', '20 mins'),
+        # CSS Tasks
+        ('Change Background & Text Colors', 'CSS Styling', 'Style a webpage with a custom background color, high-contrast dark text, and modern font families.', 'CSS', 'Beginner', '15 mins'),
+        ('Style a Modern Button with Hover', 'CSS Styling', 'Create a rounded button with custom padding, background color, and a smooth hover transition effect.', 'CSS', 'Beginner', '20 mins'),
+        ('Create a Simple Card with Flexbox', 'CSS Styling', 'Design a clean card container with borders, padding, and centered content using display: flex.', 'CSS', 'Beginner', '25 mins'),
+        # JavaScript Tasks
+        ('Display a Welcome Alert Pop-up', 'JavaScript Basics', 'Write a simple JavaScript function that shows a welcome alert dialog when the webpage is opened.', 'JavaScript', 'Beginner', '15 mins'),
+        ('Create a Button Click Counter', 'JavaScript Basics', 'Add a button on your webpage and write an event listener that counts and displays how many times it was clicked.', 'JavaScript', 'Beginner', '20 mins'),
+        ('Validate a Simple Form Input', 'JavaScript Basics', 'Use JavaScript to check if an input field is empty before form submission, and show a helpful warning message.', 'JavaScript', 'Beginner', '25 mins'),
+        # Combination Tasks
+        ('Style an HTML Profile Card', 'HTML & CSS', 'Combine HTML structure and CSS styling to build a responsive profile card with a picture, bio, and social button.', 'HTML,CSS', 'Beginner', '30 mins'),
+        ('Interactive Color Switcher Button', 'Frontend Web', 'Build a button that changes the webpage background color dynamically between light and dark modes when clicked.', 'HTML,CSS,JavaScript', 'Beginner', '30 mins')
+    ]
+    cursor.execute('DELETE FROM tasks')
+    cursor.executemany('INSERT INTO tasks (title, category, description, required_skills, difficulty, estimated_time) VALUES (?, ?, ?, ?, ?, ?)', beginner_tasks)
+
+    # Seed 5 Beginner Projects
+    beginner_projects = [
+        (
+            'Personal Portfolio Webpage',
+            'A clean, modern single-page website to introduce yourself, highlight your skills, and share your contact links.',
+            'HTML,CSS',
+            'Beginner',
+            json.dumps([
+                'Create index.html with sections: Header, About Me, Skills, and Contact Info.',
+                'Add your profile picture and clickable links to your social profiles.',
+                'Create style.css to add colors, clean fonts, card borders, and padding.',
+                'Use CSS Flexbox to organize your skills and social buttons neatly.'
+            ]),
+            'A responsive personal website that you can share with friends and recruiters.'
+        ),
+        (
+            'Simple Calculator',
+            'An easy-to-use calculator program that accepts two numbers and performs basic arithmetic operations (+, -, *, /).',
+            'Python',
+            'Beginner',
+            json.dumps([
+                'Prompt the user for input: first number, arithmetic operator, and second number.',
+                'Convert string inputs into numbers (float or int).',
+                'Use if, elif, and else conditions to perform the chosen calculation.',
+                'Handle division by zero with a friendly error message.',
+                'Print the calculation result clearly on the screen.'
+            ]),
+            'A working calculator that accurately computes math operations and handles errors gracefully.'
+        ),
+        (
+            'To-Do List',
+            'An interactive task organizer where students can add daily study tasks, mark them done, or delete them.',
+            'HTML,CSS,JavaScript',
+            'Beginner',
+            json.dumps([
+                'Build the HTML layout with an <input> text box and an "Add Task" <button>.',
+                'Style the task container, input box, and list items with clean padding and rounded corners in CSS.',
+                'Add a JavaScript event listener to the button to read the input value when clicked.',
+                'Use JavaScript DOM manipulation (document.createElement) to append the new task to the list.',
+                'Allow users to click on a task item to mark it completed or remove it.'
+            ]),
+            'A functional to-do application running in your browser that dynamically creates and manages tasks.'
+        ),
+        (
+            'Basic Quiz Application',
+            'A fun multiple-choice quiz that presents questions one by one, verifies answers, and displays your final score.',
+            'Python',
+            'Beginner',
+            json.dumps([
+                'Define a list of 3-5 beginner computer questions with options and answer keys.',
+                'Loop through the questions and display them sequentially to the user.',
+                'Collect user choices and check them against the answer key using conditions.',
+                'Track the score count for each correct answer.',
+                'Print the final score at the end with a personalized feedback message.'
+            ]),
+            'An interactive quiz game that tests knowledge and displays a final percentage score.'
+        ),
+        (
+            'Simple Registration Form',
+            'A user-friendly registration card with inputs for student name, email, password, and target role.',
+            'HTML,CSS',
+            'Beginner',
+            json.dumps([
+                'Construct an HTML form with <label> and <input> tags for Name, Email, Password, and a dropdown for Student Year.',
+                'Center the form on the screen using CSS Flexbox.',
+                'Add subtle borders, padding, focus outlines, and a stylish submit button with hover effects.',
+                'Use HTML5 validation attributes (required, type="email") to ensure clean input.'
+            ]),
+            'A polished, modern registration form card that looks like a real SaaS sign-up page.'
         )
-        
-        # Give demo user default skills
+    ]
+    cursor.execute('DELETE FROM projects')
+    cursor.executemany('INSERT INTO projects (title, description, required_skills, difficulty, steps, expected_outcome) VALUES (?, ?, ?, ?, ?, ?)', beginner_projects)
+
+    # Ensure default guest student exists
+    demo_user_id = '00000000-0000-0000-0000-000000000001'
+    cursor.execute(
+        'INSERT OR IGNORE INTO profiles (id, email, password_hash, full_name, target_role) VALUES (?, ?, ?, ?, ?)',
+        (demo_user_id, 'demo@student.edu', _hash_password('demo123'), 'Alex Chen', 'Junior Full-Stack Starter')
+    )
+    # Ensure demo user has beginner skills
+    cursor.execute("DELETE FROM user_skills WHERE user_id = ? AND skill_name NOT IN ('Python', 'HTML', 'CSS', 'JavaScript')", (demo_user_id,))
+    cursor.execute('SELECT COUNT(*) FROM user_skills WHERE user_id = ?', (demo_user_id,))
+    if cursor.fetchone()[0] == 0:
         demo_skills = [
-            (demo_user_id, 'Python', 'Intermediate'),
-            (demo_user_id, 'HTML/CSS', 'Beginner'),
-            (demo_user_id, 'Git & GitHub', 'Beginner')
+            (demo_user_id, 'Python', 'Beginner'),
+            (demo_user_id, 'HTML', 'Beginner')
         ]
         cursor.executemany('INSERT OR IGNORE INTO user_skills (user_id, skill_name, proficiency) VALUES (?, ?, ?)', demo_skills)
         
@@ -238,7 +322,7 @@ def authenticate_user(email: str, password: str) -> Optional[Dict[str, Any]]:
         }
     return None
 
-def register_user(email: str, password: str, full_name: str, target_role: str = 'AI & ML Intern') -> Dict[str, Any]:
+def register_user(email: str, password: str, full_name: str, target_role: str = 'Junior Full-Stack Starter') -> Dict[str, Any]:
     """Registers a new user."""
     user_id = str(uuid.uuid4())
     conn = get_db_connection()
@@ -271,12 +355,28 @@ def update_user_target_role(user_id: str, new_role: str):
     conn.close()
 
 def get_all_skills() -> List[Dict[str, Any]]:
+    """Returns the 4 core beginner skills with their subtopics parsed in logical order."""
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT id, name, category, description FROM skills ORDER BY category, name')
+    cursor.execute('''
+        SELECT id, name, category, description, subtopics FROM skills 
+        ORDER BY CASE name 
+            WHEN 'Python' THEN 1 
+            WHEN 'HTML' THEN 2 
+            WHEN 'CSS' THEN 3 
+            WHEN 'JavaScript' THEN 4 
+            ELSE 5 
+        END
+    ''')
     rows = cursor.fetchall()
     conn.close()
-    return [dict(r) for r in rows]
+    
+    result = []
+    for r in rows:
+        d = dict(r)
+        d['subtopics'] = json.loads(d['subtopics']) if d['subtopics'] else []
+        result.append(d)
+    return result
 
 def get_user_skills(user_id: str) -> List[str]:
     conn = get_db_connection()
@@ -284,21 +384,20 @@ def get_user_skills(user_id: str) -> List[str]:
     cursor.execute('SELECT skill_name FROM user_skills WHERE user_id = ? ORDER BY skill_name', (user_id,))
     rows = cursor.fetchall()
     conn.close()
-    return [r['skill_name'] for r in rows]
+    return [r['skill_name'] for r in rows if r['skill_name'] in ['Python', 'HTML', 'CSS', 'JavaScript']]
 
 def save_user_skills(user_id: str, skill_names: List[str]):
+    valid_skills = {'Python', 'HTML', 'CSS', 'JavaScript'}
+    filtered_skills = [s for s in skill_names if s in valid_skills]
+    
     conn = get_db_connection()
     cursor = conn.cursor()
-    # Delete existing skills for user
     cursor.execute('DELETE FROM user_skills WHERE user_id = ?', (user_id,))
-    # Insert new skills
-    for s in skill_names:
-        s_clean = s.strip()
-        if s_clean:
-            cursor.execute(
-                'INSERT OR IGNORE INTO user_skills (user_id, skill_name, proficiency) VALUES (?, ?, ?)',
-                (user_id, s_clean, 'Beginner')
-            )
+    for s in filtered_skills:
+        cursor.execute(
+            'INSERT INTO user_skills (user_id, skill_name, proficiency) VALUES (?, ?, ?)',
+            (user_id, s, 'Beginner')
+        )
     conn.commit()
     conn.close()
 
@@ -328,10 +427,53 @@ def get_all_tasks() -> List[Dict[str, Any]]:
     tasks = []
     for r in rows:
         t = dict(r)
-        # Parse comma-separated skills into a list
         t['required_skills'] = [s.strip() for s in t['required_skills'].split(',') if s.strip()]
         tasks.append(t)
     return tasks
+
+def get_tasks_for_skills(user_skills: List[str]) -> List[Dict[str, Any]]:
+    """
+    Returns tasks that require ONLY skills the user has selected.
+    If a task requires 'HTML,CSS', user must have both HTML and CSS.
+    """
+    all_tasks = get_all_tasks()
+    user_skill_set = set(user_skills)
+    
+    matched = []
+    for t in all_tasks:
+        req_set = set(t['required_skills'])
+        if req_set.issubset(user_skill_set):
+            matched.append(t)
+    return matched
+
+def get_all_projects() -> List[Dict[str, Any]]:
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT id, title, description, required_skills, difficulty, steps, expected_outcome FROM projects')
+    rows = cursor.fetchall()
+    conn.close()
+    
+    projects = []
+    for r in rows:
+        p = dict(r)
+        p['required_skills'] = [s.strip() for s in p['required_skills'].split(',') if s.strip()]
+        p['steps'] = json.loads(p['steps']) if p['steps'] else []
+        projects.append(p)
+    return projects
+
+def get_projects_for_skills(user_skills: List[str]) -> List[Dict[str, Any]]:
+    """
+    Returns beginner projects that require ONLY skills the user has selected.
+    """
+    all_projects = get_all_projects()
+    user_skill_set = set(user_skills)
+    
+    matched = []
+    for p in all_projects:
+        req_set = set(p['required_skills'])
+        if req_set.issubset(user_skill_set):
+            matched.append(p)
+    return matched
 
 def save_user_evidence(user_id: str, project_title: str, target_skill: str, description: str, github_url: str, live_url: str = ''):
     conn = get_db_connection()

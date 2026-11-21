@@ -4,23 +4,24 @@
 
 {% block content %}
 <div class="container">
+  
   <!-- Welcome Banner -->
-  <div class="card" style="margin-bottom: 2rem; background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: #fff;">
+  <div class="card" style="margin-bottom: 2rem; background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: #fff; border: none;">
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
       <div>
-        <span class="badge" style="background: rgba(255,255,255,0.2); color: #fff; margin-bottom: 0.5rem;">
-          Target Role: {{ user.target_role }}
+        <span class="pill" style="background: rgba(255,255,255,0.18); color: #fff; margin-bottom: 0.5rem;">
+          Track: {{ user.target_role }}
         </span>
-        <h1 style="font-size: 2rem; font-weight: 800; margin-bottom: 0.25rem;">
+        <h1 style="font-size: 2rem; font-weight: 800; margin-bottom: 0.25rem; color: #fff;">
           Welcome back, {{ user.full_name }}! 👋
         </h1>
         <p style="color: #c7d2fe; font-size: 1rem;">
-          Here is your real-time internship readiness progress and current actionable tasks.
+          Here is your beginner progress across the 4 core foundations: Python, HTML, CSS, and JavaScript.
         </p>
       </div>
       <div>
         <a href="{{ url_for('skills') }}" class="btn" style="background: #fff; color: #1e1b4b; font-weight: 700;">
-          + Update My Skills
+          + Select My Skills
         </a>
       </div>
     </div>
@@ -28,37 +29,37 @@
 
   <!-- Key Metrics Row -->
   <div class="grid-4" style="margin-bottom: 2rem;">
-    <!-- Metric 1 -->
+    <!-- Metric 1: Skills -->
     <div class="card" style="text-align: center;">
-      <span style="font-size: 0.85rem; color: #64748b; font-weight: 600;">ACTIVE SKILLS</span>
-      <h2 style="font-size: 2.2rem; font-weight: 800; color: var(--primary); margin: 0.25rem 0;">
-        {{ user_skills|length }}
+      <span style="font-size: 0.82rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Core Skills</span>
+      <h2 style="font-size: 2.2rem; font-weight: 800; color: var(--primary-blue); margin: 0.25rem 0;">
+        {{ user_skills|length }} / 4
       </h2>
       <a href="{{ url_for('skills') }}" style="font-size: 0.85rem;">Manage Skills &rarr;</a>
     </div>
 
-    <!-- Metric 2 -->
+    <!-- Metric 2: Tasks -->
     <div class="card" style="text-align: center;">
-      <span style="font-size: 0.85rem; color: #64748b; font-weight: 600;">TASKS BUILDABLE NOW</span>
+      <span style="font-size: 0.82rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Tasks Ready to Build</span>
       <h2 style="font-size: 2.2rem; font-weight: 800; color: var(--success); margin: 0.25rem 0;">
-        {{ ready_tasks_count }}
+        {{ tasks_count }}
       </h2>
       <a href="{{ url_for('tasks') }}" style="font-size: 0.85rem;">View Tasks &rarr;</a>
     </div>
 
-    <!-- Metric 3 -->
+    <!-- Metric 3: Projects -->
     <div class="card" style="text-align: center;">
-      <span style="font-size: 0.85rem; color: #64748b; font-weight: 600;">ROLE MATCH</span>
-      <h2 style="font-size: 2.2rem; font-weight: 800; color: {{ gap.status_color }}; margin: 0.25rem 0;">
-        {{ gap.match_percentage }}%
+      <span style="font-size: 0.82rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Projects Ready</span>
+      <h2 style="font-size: 2.2rem; font-weight: 800; color: var(--accent-violet); margin: 0.25rem 0;">
+        {{ projects_count }}
       </h2>
-      <a href="{{ url_for('gap_analysis') }}" style="font-size: 0.85rem;">View Gap Analysis &rarr;</a>
+      <a href="{{ url_for('projects') }}" style="font-size: 0.85rem;">View Projects &rarr;</a>
     </div>
 
-    <!-- Metric 4 -->
+    <!-- Metric 4: Proof -->
     <div class="card" style="text-align: center;">
-      <span style="font-size: 0.85rem; color: #64748b; font-weight: 600;">EVIDENCE SUBMISSIONS</span>
-      <h2 style="font-size: 2.2rem; font-weight: 800; color: var(--secondary); margin: 0.25rem 0;">
+      <span style="font-size: 0.82rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">GitHub Proofs</span>
+      <h2 style="font-size: 2.2rem; font-weight: 800; color: #0891b2; margin: 0.25rem 0;">
         {{ evidence_count }}
       </h2>
       <a href="{{ url_for('projects') }}" style="font-size: 0.85rem;">Submit Proof &rarr;</a>
@@ -66,92 +67,100 @@
   </div>
 
   <!-- Main Content Grid -->
-  <div class="grid-2">
-    <!-- Left Column: Readiness Summary -->
+  <div class="grid-2" style="margin-bottom: 2rem;">
+    
+    <!-- Left Column: Current Skills & Next Skill -->
     <div class="card">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-        <h3 style="font-size: 1.2rem; font-weight: 700;">Internship Readiness Overview</h3>
-        <span class="badge" style="background: {{ gap.status_color }}22; color: {{ gap.status_color }};">
-          {{ gap.status_label }}
-        </span>
+        <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--text-navy);">
+          Your Current Skills ({{ user_skills|length }} of 4)
+        </h3>
+        <a href="{{ url_for('skills') }}" class="pill pill-brand" style="font-size: 0.75rem;">Edit</a>
       </div>
 
-      <p style="color: #64748b; font-size: 0.95rem; margin-bottom: 1rem;">
-        {{ gap.status_summary }}
-      </p>
-
-      <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 0.9rem;">
-        <span>Skill Match Progress</span>
-        <span>{{ gap.match_percentage }}%</span>
-      </div>
-      <div class="progress-container">
-        <div class="progress-bar" style="width: {{ gap.match_percentage }}%; background: {{ gap.status_color }};"></div>
-      </div>
-
-      <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border);">
-        <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.75rem;">Top Skills to Master Next:</h4>
-        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-          {% for ms in gap.missing_required %}
-            <span class="badge badge-danger">⚠️ {{ ms }} (Required)</span>
-          {% endfor %}
-          {% for mp in gap.missing_preferred %}
-            <span class="badge badge-warning">💡 {{ mp }} (Preferred)</span>
-          {% endfor %}
-          {% if not gap.missing_required and not gap.missing_preferred %}
-            <span class="badge badge-success">🎉 All benchmark skills acquired!</span>
+      <!-- Skills Badges -->
+      <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem;">
+        {% for s in ['Python', 'HTML', 'CSS', 'JavaScript'] %}
+          {% if s in user_skills %}
+            <span class="pill pill-success" style="font-size: 0.88rem; padding: 0.35rem 0.85rem;">
+              ✓ {{ s }} (Selected)
+            </span>
+          {% else %}
+            <span class="pill" style="font-size: 0.88rem; padding: 0.35rem 0.85rem; background: #f1f5f9; color: #94a3b8; border: 1px dashed #cbd5e1;">
+              + {{ s }} (Not yet)
+            </span>
           {% endif %}
-        </div>
+        {% endfor %}
       </div>
 
-      <div style="margin-top: 1.5rem;">
-        <a href="{{ url_for('readiness') }}" class="btn btn-primary" style="width: 100%;">
-          View Full 30-Day Learning Plan &rarr;
-        </a>
+      <!-- Dynamic Next Skill Highlight -->
+      <div style="background: linear-gradient(135deg, #f5f3ff 0%, #eff6ff 100%); border-radius: var(--radius-sm); border: 1.5px solid #ddd6fe; padding: 1.25rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <span style="font-size: 0.8rem; font-weight: 700; color: var(--accent-violet); text-transform: uppercase;">
+            Recommended Next Skill:
+          </span>
+          <span class="pill pill-violet" style="font-weight: 700;">
+            {{ next_skills.primary_next_skill }}
+          </span>
+        </div>
+        <p style="font-size: 0.9rem; color: var(--text-body); line-height: 1.5;">
+          {{ next_skills.why_useful }}
+        </p>
+        <div style="margin-top: 1rem;">
+          <a href="{{ url_for('tasks') }}" class="btn btn-violet btn-sm" style="width: 100%;">
+            Explore Next Tasks & Learning Order &rarr;
+          </a>
+        </div>
       </div>
     </div>
 
-    <!-- Right Column: Recent Activity & Quick Nav -->
+    <!-- Right Column: Recent Activity & Step Workflow -->
     <div class="card">
-      <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem;">Recent Portfolio Evidence</h3>
+      <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--text-navy); margin-bottom: 1rem;">
+        Recent GitHub Portfolio Proof
+      </h3>
       {% if evidence_list %}
         <div style="display: flex; flex-direction: column; gap: 0.75rem;">
           {% for ev in evidence_list %}
-            <div style="padding: 0.75rem 1rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: #f8fafc;">
+            <div style="padding: 0.75rem 1rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: #f8fafc;">
               <div style="display: flex; justify-content: space-between; align-items: center;">
-                <strong style="font-size: 0.95rem;">{{ ev.project_title }}</strong>
-                <span class="badge badge-success">{{ ev.status }}</span>
+                <strong style="font-size: 0.95rem; color: var(--text-navy);">{{ ev.project_title }}</strong>
+                <span class="pill pill-success" style="font-size: 0.75rem;">{{ ev.status }}</span>
               </div>
-              <p style="font-size: 0.85rem; color: #64748b; margin-top: 0.2rem;">
+              <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.2rem;">
                 Skill Proved: <strong>{{ ev.target_skill }}</strong>
               </p>
-              <a href="{{ ev.github_url }}" target="_blank" style="font-size: 0.85rem; margin-top: 0.25rem; display: inline-block;">
-                🔗 View GitHub Repo &rarr;
+              <a href="{{ ev.github_url }}" target="_blank" style="font-size: 0.82rem; margin-top: 0.25rem; display: inline-block;">
+                🔗 View GitHub Repository &rarr;
               </a>
             </div>
           {% endfor %}
         </div>
       {% else %}
-        <div style="text-align: center; padding: 2rem 1rem; background: #f8fafc; border-radius: var(--radius-sm); border: 1px dashed var(--border);">
-          <p style="color: #64748b; font-size: 0.95rem; margin-bottom: 1rem;">
-            You haven't submitted any project proof yet! Recruiters look for GitHub code.
+        <div style="text-align: center; padding: 2rem 1rem; background: #f8fafc; border-radius: var(--radius-sm); border: 1px dashed var(--border-color);">
+          <p style="color: var(--text-muted); font-size: 0.92rem; margin-bottom: 1rem;">
+            You have not submitted any GitHub project proof yet!
           </p>
           <a href="{{ url_for('projects') }}" class="btn btn-outline btn-sm">
-            Check AI Project Suggestions & Submit
+            Check Projects & Submit Proof
           </a>
         </div>
       {% endif %}
 
-      <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border);">
-        <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.75rem;">Step-by-Step Workflow:</h4>
-        <ol style="padding-left: 1.2rem; font-size: 0.9rem; color: #475569; display: flex; flex-direction: column; gap: 0.4rem;">
-          <li><a href="{{ url_for('skills') }}">Select your existing programming skills</a></li>
-          <li><a href="{{ url_for('tasks') }}">Discover instant practical mini-tasks</a></li>
-          <li><a href="{{ url_for('gap_analysis') }}">Analyze gaps against target internship</a></li>
-          <li><a href="{{ url_for('projects') }}">Build AI-recommended project & submit GitHub proof</a></li>
-          <li><a href="{{ url_for('readiness') }}">Print your 30-Day Internship Readiness Report</a></li>
+      <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+        <h4 style="font-size: 0.92rem; font-weight: 700; color: var(--text-navy); margin-bottom: 0.5rem;">
+          Your 4-Step Beginner Flow:
+        </h4>
+        <ol style="padding-left: 1.2rem; font-size: 0.88rem; color: var(--text-body); display: flex; flex-direction: column; gap: 0.35rem;">
+          <li><a href="{{ url_for('skills') }}">Select your skills (Python, HTML, CSS, JavaScript)</a></li>
+          <li><a href="{{ url_for('tasks') }}">Build small practical tasks matching your skills</a></li>
+          <li><a href="{{ url_for('projects') }}">Build beginner projects and submit your GitHub links</a></li>
+          <li><a href="{{ url_for('readiness') }}">Check your Readiness Report and 30-Day Sprint Plan</a></li>
         </ol>
       </div>
     </div>
+
   </div>
+
 </div>
 {% endblock %}

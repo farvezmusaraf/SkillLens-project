@@ -1,6 +1,7 @@
 """
 SkillLens - Hackathon MVP Main Application Entry Point
 Flask Backend coordinating routes, gap analysis, AI services, and data storage.
+Refocused strictly on 4 Core Beginner Skills: Python, HTML, CSS, JavaScript.
 """
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from functools import wraps
@@ -8,7 +9,7 @@ import json
 
 from services.config import FLASK_SECRET_KEY, FLASK_DEBUG
 from services import supabase_service as db
-from services.gap_analysis import analyze_skill_gap, match_practical_tasks
+from services.gap_analysis import analyze_skill_gap, match_practical_tasks, get_next_skills_recommendations
 from services.ai_service import generate_project_recommendations, generate_30_day_plan
 
 app = Flask(__name__)
@@ -21,7 +22,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
-            flash('Please log in or try the demo account to access SkillLens.', 'info')
+            flash('Please log in or try the instant demo account to access SkillLens.', 'info')
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
@@ -72,7 +73,7 @@ def login():
 @app.route('/login-demo')
 @app.route('/login_demo')
 def login_demo():
-    """Quick one-click login for hackathon judges & instant testing."""
+    """Quick one-click login for hackathon judges & instant student testing."""
     demo_user_id = '00000000-0000-0000-0000-000000000001'
     user = db.get_user_profile(demo_user_id)
     if user:
@@ -88,7 +89,7 @@ def register():
     full_name = request.form.get('full_name', '').strip()
     email = request.form.get('email', '').strip()
     password = request.form.get('password', '').strip()
-    target_role = request.form.get('target_role', 'AI & ML Intern')
+    target_role = request.form.get('target_role', 'Junior Full-Stack Starter')
     
     if not full_name or not email or not password:
         flash('Please fill in all required fields.', 'danger')
@@ -100,7 +101,7 @@ def register():
         session['user_id'] = user['id']
         session['user_name'] = user['full_name']
         session['user_role'] = user['target_role']
-        flash('Account created successfully! Start by selecting the skills you know.', 'success')
+        flash('Account created successfully! Start by selecting your beginner skills.', 'success')
         return redirect(url_for('skills'))
     else:
         flash(result.get('error', 'Registration failed.'), 'danger')
@@ -126,10 +127,12 @@ def dashboard():
     role_reqs = db.get_role_requirements(user['target_role'])
     gap_result = analyze_skill_gap(user_skills, role_reqs)
     
-    # Practical tasks count
-    all_tasks = db.get_all_tasks()
-    matched_tasks = match_practical_tasks(user_skills, all_tasks)
-    ready_tasks_count = len([t for t in matched_tasks if t['is_ready_now']])
+    # Practical tasks matching selected skills
+    matched_tasks = db.get_tasks_for_skills(user_skills)
+    matched_projects = db.get_projects_for_skills(user_skills)
+    
+    # Dynamic next skills recommendation
+    next_skills = get_next_skills_recommendations(user_skills)
     
     # Evidence submitted
     evidence_list = db.get_user_evidence(user['id'])
@@ -139,13 +142,15 @@ def dashboard():
         user=user,
         user_skills=user_skills,
         gap=gap_result,
-        ready_tasks_count=ready_tasks_count,
+        tasks_count=len(matched_tasks),
+        projects_count=len(matched_projects),
+        next_skills=next_skills,
         evidence_count=len(evidence_list),
-        evidence_list=evidence_list[:3] # Show recent 3
+        evidence_list=evidence_list[:3]
     )
 
 
-# --- FEATURE 1: Student Skill Selection ---
+# --- FEATURE 1: Student Skill Selection (4 Beginner Skills) ---
 @app.route('/skills', methods=['GET', 'POST'])
 @login_required
 def skills():
@@ -154,27 +159,12 @@ def skills():
     user_skills = db.get_user_skills(user['id'])
     
     if request.method == 'POST':
-        # Selected skills from form
         selected = request.form.getlist('selected_skills')
-        
-        # Handle custom skill if typed in
-        custom_skill = request.form.get('custom_skill', '').strip()
-        if custom_skill and custom_skill not in selected:
-            selected.append(custom_skill)
-            
         db.save_user_skills(user['id'], selected)
-        flash('Your skills have been saved! Check out practical tasks you can build right now.', 'success')
+        flash('Your skills have been saved! Here are the practical tasks you can build right now.', 'success')
         return redirect(url_for('tasks'))
         
-    # Group skills by category for clean UI
-    categories = {}
-    for s in all_skills:
-        cat = s['category']
-        if cat not in categories:
-            categories[cat] = []
-        categories[cat].append(s)
-        
-    return render_template('skills.html', categories=categories, user_skills=user_skills)
+    return render_template('skills.html', skills=all_skills, user_skills=user_skills)
 
 
 # --- FEATURE 2: Practical Tasks with Existing Skills ---
@@ -183,14 +173,18 @@ def skills():
 def tasks():
     user = get_current_user()
     user_skills = db.get_user_skills(user['id'])
-    all_tasks = db.get_all_tasks()
     
-    matched_tasks = match_practical_tasks(user_skills, all_tasks)
+    # ONLY show tasks that require skills the student currently has
+    matched_tasks = db.get_tasks_for_skills(user_skills)
+    
+    # Dynamic recommended next skills
+    next_skills = get_next_skills_recommendations(user_skills)
     
     return render_template(
         'tasks.html',
         user_skills=user_skills,
-        matched_tasks=matched_tasks
+        matched_tasks=matched_tasks,
+        next_skills=next_skills
     )
 
 
@@ -201,36 +195,35 @@ def gap_analysis():
     user = get_current_user()
     roles = db.get_target_roles()
     
-    # If user changed target role via dropdown form
     if request.method == 'POST':
         new_role = request.form.get('target_role')
         if new_role and new_role in roles:
             db.update_user_target_role(user['id'], new_role)
             user['target_role'] = new_role
-            flash(f"Updated your target internship role to '{new_role}'!", 'success')
+            flash(f"Updated your target track to '{new_role}'!", 'success')
             
     current_role = user['target_role']
     user_skills = db.get_user_skills(user['id'])
     role_reqs = db.get_role_requirements(current_role)
     gap_result = analyze_skill_gap(user_skills, role_reqs)
+    next_skills = get_next_skills_recommendations(user_skills)
     
     return render_template(
         'gap_analysis.html',
         current_role=current_role,
         roles=roles,
         user_skills=user_skills,
-        gap=gap_result
+        gap=gap_result,
+        next_skills=next_skills
     )
 
 
-# --- FEATURE 4: AI Project Recommendations & Evidence Submission ---
+# --- FEATURE 4: Beginner Projects & Evidence Submission ---
 @app.route('/projects', methods=['GET', 'POST'])
 @login_required
 def projects():
     user = get_current_user()
     user_skills = db.get_user_skills(user['id'])
-    role_reqs = db.get_role_requirements(user['target_role'])
-    gap_result = analyze_skill_gap(user_skills, role_reqs)
     
     # Handle new evidence submission (GitHub link)
     if request.method == 'POST':
@@ -247,17 +240,18 @@ def projects():
             flash('Project evidence submitted successfully! It counts towards your internship readiness.', 'success')
             return redirect(url_for('projects'))
             
-    # Combine missing skills (required + preferred)
-    all_missing = gap_result['missing_required'] + gap_result['missing_preferred']
-    recommended_projects = generate_project_recommendations(user['target_role'], all_missing, user_skills)
+    # ONLY show projects matching the user's selected skills
+    matched_projects = db.get_projects_for_skills(user_skills)
+    next_skills = get_next_skills_recommendations(user_skills)
     submitted_evidence = db.get_user_evidence(user['id'])
     
     return render_template(
         'projects.html',
         target_role=user['target_role'],
-        recommended_projects=recommended_projects,
+        user_skills=user_skills,
+        projects=matched_projects,
         submitted_evidence=submitted_evidence,
-        missing_skills=all_missing
+        next_skills=next_skills
     )
 
 
@@ -270,19 +264,17 @@ def readiness():
     role_reqs = db.get_role_requirements(user['target_role'])
     gap_result = analyze_skill_gap(user_skills, role_reqs)
     evidence_list = db.get_user_evidence(user['id'])
+    next_skills = get_next_skills_recommendations(user_skills)
     
     # Calculate composite readiness score:
-    # Base match score from skills (up to 75%) + Evidence Bonus (up to 25%, 10% per completed project)
+    # Base match score from skills (up to 75%) + Evidence Bonus (up to 25%, 12.5% per completed project)
     base_score = gap_result['match_percentage']
-    evidence_bonus = min(25, len(evidence_list) * 10)
+    evidence_bonus = min(25, len(evidence_list) * 12)
     composite_score = min(100, int(round((base_score * 0.75) + evidence_bonus)))
     
     all_missing = gap_result['missing_required'] + gap_result['missing_preferred']
-    
-    # Retrieve or generate 30-day plan
     plan = generate_30_day_plan(user['target_role'], all_missing, user_skills, composite_score)
     
-    # Save the report snapshot
     db.save_readiness_report(user['id'], user['target_role'], composite_score, all_missing, plan)
     
     return render_template(
@@ -294,13 +286,14 @@ def readiness():
         evidence_bonus=evidence_bonus,
         gap=gap_result,
         evidence_list=evidence_list,
-        plan=plan
+        plan=plan,
+        next_skills=next_skills
     )
 
 
 if __name__ == '__main__':
     print("=" * 60)
-    print("Starting SkillLens Hackathon MVP Server")
-    print("Open your browser and navigate to: http://127.0.0.1:5000")
+    print("Starting SkillLens Beginner-Focused Platform")
+    print("Open your browser: http://127.0.0.1:5000")
     print("=" * 60)
     app.run(host='127.0.0.1', port=5000, debug=FLASK_DEBUG)
