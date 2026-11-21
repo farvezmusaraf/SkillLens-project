@@ -35,10 +35,22 @@ def get_current_user():
 
 @app.context_processor
 def inject_global_data():
-    """Provides current user and roles globally across all templates."""
+    """Provides current user, roles, skills, and recommendations globally across all templates."""
     user = get_current_user()
     roles = db.get_target_roles()
-    return dict(current_user=user, available_roles=roles)
+    user_skills = db.get_user_skills(user['id']) if user else []
+    try:
+        next_skills = get_next_skills_recommendations(user_skills)
+    except Exception:
+        next_skills = {
+            'primary_next_skill': 'HTML',
+            'why_useful': 'Learn HTML to turn your code into real web pages.',
+            'basic_topics': ['Headings', 'Paragraphs', 'Links', 'Images', 'Forms'],
+            'learning_order': ['1. HTML', '2. CSS', '3. JavaScript', '4. Python'],
+            'is_all_completed': False,
+            'unselected_skills': ['HTML', 'CSS', 'JavaScript']
+        }
+    return dict(current_user=user, available_roles=roles, next_skills=next_skills, user_skills=user_skills)
 
 
 # -------------------------------------------------------------

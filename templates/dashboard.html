@@ -94,6 +94,7 @@
       </div>
 
       <!-- Dynamic Next Skill Highlight -->
+      {% if next_skills and next_skills.primary_next_skill %}
       <div style="background: linear-gradient(135deg, #f5f3ff 0%, #eff6ff 100%); border-radius: var(--radius-sm); border: 1.5px solid #ddd6fe; padding: 1.25rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
           <span style="font-size: 0.8rem; font-weight: 700; color: var(--accent-violet); text-transform: uppercase;">
@@ -112,6 +113,7 @@
           </a>
         </div>
       </div>
+      {% endif %}
     </div>
 
     <!-- Right Column: Recent Activity & Step Workflow -->

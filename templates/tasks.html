@@ -92,6 +92,7 @@
   <!-- ==========================================================
        SECTION 5: RECOMMENDED NEXT SKILLS TO LEARN
        ========================================================== -->
+  {% if next_skills and next_skills.primary_next_skill %}
   <div class="card" style="border: 2px solid var(--accent-violet); background: linear-gradient(180deg, #ffffff 0%, #faf8ff 100%); margin-bottom: 3rem;">
     
     <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
@@ -155,6 +156,7 @@
     </div>
 
   </div>
+  {% endif %}
 
   <!-- Bottom CTA -->
   <div style="text-align: center; margin-bottom: 2rem;">
