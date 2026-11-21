@@ -1,6 +1,15 @@
 // SkillLens Interactive Client Script
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Live Skill Search Filter
+  // 1. Mobile Hamburger Menu Toggle
+  const mobileToggle = document.getElementById('mobileToggle');
+  const navMenu = document.getElementById('navMenu');
+  if (mobileToggle && navMenu) {
+    mobileToggle.addEventListener('click', () => {
+      navMenu.classList.toggle('show');
+    });
+  }
+
+  // 2. Live Skill Search Filter
   const skillSearchInput = document.getElementById('skillSearchInput');
   if (skillSearchInput) {
     skillSearchInput.addEventListener('input', (e) => {
@@ -17,17 +26,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 2. Auto Dismiss Flash Alerts after 5 seconds
+  // 3. Auto Dismiss Flash Alerts after 5 seconds
   const alerts = document.querySelectorAll('.alert');
   alerts.forEach(alert => {
     setTimeout(() => {
-      alert.style.transition = 'opacity 0.5s ease';
+      alert.style.transition = 'opacity 0.4s ease';
       alert.style.opacity = '0';
-      setTimeout(() => alert.remove(), 500);
+      setTimeout(() => alert.remove(), 400);
     }, 5000);
   });
 
-  // 3. Print Readiness Report Shortcut
+  // 4. Print Readiness Report
   const printBtn = document.getElementById('printReportBtn');
   if (printBtn) {
     printBtn.addEventListener('click', () => {

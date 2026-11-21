@@ -9,15 +9,22 @@
 </head>
 <body>
 
-  <!-- Navigation Bar -->
+  <!-- Modern SaaS Header & Navigation -->
   <header class="navbar">
     <div class="container nav-content">
       <a href="{{ url_for('dashboard' if current_user else 'index') }}" class="logo">
-        <span>🎯 SkillLens</span>
+        <span class="logo-badge">🎯</span>
+        <span class="logo-text">SkillLens</span>
       </a>
 
+      <!-- Mobile Hamburger Button -->
+      <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation">
+        ☰
+      </button>
+
+      <!-- Navigation Links -->
       <nav>
-        <ul class="nav-links">
+        <ul class="nav-menu" id="navMenu">
           {% if current_user %}
             <li><a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">Dashboard</a></li>
             <li><a href="{{ url_for('skills') }}" class="nav-link {% if request.endpoint == 'skills' %}active{% endif %}">1. Skills</a></li>
@@ -27,8 +34,9 @@
             <li><a href="{{ url_for('readiness') }}" class="nav-link {% if request.endpoint == 'readiness' %}active{% endif %}">5. Readiness Plan</a></li>
             <li><a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm">Log Out</a></li>
           {% else %}
+            <li><a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">Home</a></li>
             <li><a href="{{ url_for('login') }}" class="nav-link">Sign In</a></li>
-            <li><a href="{{ url_for('login_demo') }}" class="btn btn-primary btn-sm">Instant Demo</a></li>
+            <li><a href="{{ url_for('login_demo') }}" class="btn btn-primary btn-sm">⚡ Instant Demo</a></li>
           {% endif %}
         </ul>
       </nav>
@@ -50,15 +58,37 @@
   </div>
 
   <!-- Main Body Content -->
-  <main style="padding: 2rem 0; flex: 1;">
+  <main style="padding: 2.5rem 0; flex: 1;">
     {% block content %}{% endblock %}
   </main>
 
-  <!-- Footer -->
+  <!-- SaaS Footer -->
   <footer class="no-print">
-    <div class="container">
-      <p><strong>SkillLens</strong> &bull; Hackathon MVP built with Python Flask & Supabase.</p>
-      <p style="margin-top: 0.25rem;">Empowering 1st-year engineers to bridge classroom theory into high-impact internships.</p>
+    <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
+      <div>
+        <div style="font-weight: 800; color: var(--text-navy); font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+          <span style="font-size: 1.2rem;">🎯</span> SkillLens
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.88rem; max-width: 420px;">
+          Empowering 1st-year CSE AI & ML students to bridge early university coursework into verified internship readiness.
+        </p>
+      </div>
+
+      <div style="display: flex; gap: 2rem; font-size: 0.9rem;">
+        <div>
+          <strong style="color: var(--text-navy); display: block; margin-bottom: 0.4rem;">Product</strong>
+          <a href="{{ url_for('login_demo') }}" style="color: var(--text-muted); display: block;">Instant Demo</a>
+          <a href="{{ url_for('login') }}" style="color: var(--text-muted); display: block;">Student Sign In</a>
+        </div>
+        <div>
+          <strong style="color: var(--text-navy); display: block; margin-bottom: 0.4rem;">Tech Stack</strong>
+          <span style="color: var(--text-muted); display: block;">Python Flask</span>
+          <span style="color: var(--text-muted); display: block;">Supabase PostgreSQL</span>
+        </div>
+      </div>
+    </div>
+    <div class="container" style="margin-top: 2rem; padding-top: 1.25rem; border-top: 1px solid var(--border-color); text-align: center; color: #94a3b8; font-size: 0.82rem;">
+      &copy; 2026 SkillLens &bull; Built with Python Flask & Supabase for University Hackathons.
     </div>
   </footer>
 

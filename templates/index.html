@@ -1,68 +1,214 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container" style="max-width: 900px; text-align: center; padding: 3rem 1rem;">
-  <span class="badge badge-primary" style="margin-bottom: 1rem; padding: 0.4rem 1rem; font-size: 0.85rem;">
-    🚀 Hackathon MVP for Student Engineers
-  </span>
+<div class="container">
   
-  <h1 style="font-size: 2.8rem; font-weight: 800; line-height: 1.2; margin-bottom: 1.2rem; color: #0f172a;">
-    Turn Your Classroom Skills Into <br>
-    <span style="background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-      Real Internship Readiness
-    </span>
-  </h1>
+  <!-- Hero Section -->
+  <section style="text-align: center; padding: 3.5rem 1rem 4rem 1rem; max-width: 900px; margin: 0 auto;">
+    
+    <!-- SaaS Pill Tagline -->
+    <div style="display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem;" class="pill pill-brand">
+      <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--primary-blue);"></span>
+      <span style="font-weight: 700;">SkillLens v1.0</span> &bull; AI-Powered Career Readiness for BTech Students
+    </div>
 
-  <p style="font-size: 1.2rem; color: #64748b; margin-bottom: 2.5rem; max-width: 700px; margin-left: auto; margin-right: auto;">
-    Don't wait for your 3rd year to know what recruiters want. SkillLens maps your existing skills, reveals practical projects you can build today, pinpoints internship gaps, and gives you a 30-day plan.
-  </p>
+    <!-- Main Headline with Blue & Violet Gradient -->
+    <h1 style="font-size: 3.2rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 1.4rem; color: var(--text-navy);">
+      Turn Your Classroom Code Into <br>
+      <span style="background: var(--gradient-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+        High-Impact Internship Readiness
+      </span>
+    </h1>
 
-  <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 3.5rem;">
-    <a href="{{ url_for('login_demo') }}" class="btn btn-primary" style="font-size: 1.05rem; padding: 0.8rem 1.8rem;">
-      🎯 Launch Instant Student Demo
+    <!-- Subtitle -->
+    <p style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 2.5rem; max-width: 720px; margin-left: auto; margin-right: auto; line-height: 1.6;">
+      Don't wait until 3rd year to discover what tech companies require. SkillLens maps your existing skills, reveals practical projects you can build right now, identifies missing gaps, and creates your personalized 30-day roadmap.
+    </p>
+
+    <!-- Call to Actions -->
+    <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 3rem;">
+      <a href="{{ url_for('login_demo') }}" class="btn btn-primary btn-lg">
+        ⚡ Launch Instant Student Demo &rarr;
+      </a>
+      <a href="{{ url_for('login') }}" class="btn btn-outline btn-lg">
+        Create Student Profile
+      </a>
+    </div>
+
+    <!-- Quick Proof Pills -->
+    <div style="display: flex; justify-content: center; gap: 2rem; color: var(--text-muted); font-size: 0.88rem; flex-wrap: wrap;">
+      <span>✓ No credit card or setup needed</span>
+      <span>✓ Instant 1-click evaluation</span>
+      <span>✓ Verified GitHub proof tracking</span>
+    </div>
+  </section>
+
+  <!-- Interactive Live Preview Card (SaaS Style) -->
+  <section style="margin-bottom: 5rem;">
+    <div class="card" style="padding: 2rem; border: 1.5px solid #cbd5e1; box-shadow: var(--shadow-hover); border-radius: var(--radius-lg); background: #ffffff;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div style="display: flex; gap: 6px;">
+            <span style="width: 12px; height: 12px; border-radius: 50%; background: #ef4444; display: inline-block;"></span>
+            <span style="width: 12px; height: 12px; border-radius: 50%; background: #f59e0b; display: inline-block;"></span>
+            <span style="width: 12px; height: 12px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
+          </div>
+          <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-navy);">SkillLens Live Dashboard &bull; Candidate Evaluation Preview</span>
+        </div>
+        <div class="pill pill-violet">
+          Target Role: AI & ML Intern
+        </div>
+      </div>
+
+      <!-- Preview Mock Content -->
+      <div class="grid-3" style="margin-bottom: 1.5rem;">
+        <div style="background: #f8fafc; padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+          <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Active Skills</span>
+          <div style="font-size: 1.8rem; font-weight: 800; color: var(--primary-blue); margin: 0.2rem 0;">4 Learned</div>
+          <div style="display: flex; gap: 0.3rem; flex-wrap: wrap; margin-top: 0.5rem;">
+            <span class="pill pill-success" style="font-size: 0.75rem; padding: 0.2rem 0.5rem;">Python</span>
+            <span class="pill pill-success" style="font-size: 0.75rem; padding: 0.2rem 0.5rem;">Git & GitHub</span>
+            <span class="pill pill-success" style="font-size: 0.75rem; padding: 0.2rem 0.5rem;">HTML/CSS</span>
+          </div>
+        </div>
+
+        <div style="background: #f8fafc; padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+          <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Role Match Gap</span>
+          <div style="font-size: 1.8rem; font-weight: 800; color: var(--warning); margin: 0.2rem 0;">65% Match</div>
+          <div class="progress-container" style="height: 8px; margin-top: 0.75rem;">
+            <div class="progress-bar" style="width: 65%; background: var(--warning);"></div>
+          </div>
+          <span style="font-size: 0.75rem; color: var(--danger); font-weight: 600;">Missing: NumPy, Scikit-Learn</span>
+        </div>
+
+        <div style="background: #f8fafc; padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+          <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">AI 30-Day Plan</span>
+          <div style="font-size: 1.8rem; font-weight: 800; color: var(--accent-violet); margin: 0.2rem 0;">Week 1 Sprint</div>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.5rem;">
+            Master NumPy matrix operations & code 3 data scripts.
+          </p>
+        </div>
+      </div>
+
+      <div style="text-align: center;">
+        <a href="{{ url_for('login_demo') }}" class="btn btn-outline btn-sm">
+          Try this interactive dashboard live with 1 click &rarr;
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 Core Features Grid -->
+  <section style="margin-bottom: 5rem;">
+    <div style="text-align: center; margin-bottom: 3rem;">
+      <span class="pill pill-violet" style="margin-bottom: 0.75rem;">Structured Workflow</span>
+      <h2 style="font-size: 2.2rem; font-weight: 800; color: var(--text-navy);">
+        The 5 Steps from First-Year Student to Internship Ready
+      </h2>
+      <p style="color: var(--text-muted); font-size: 1.05rem; max-width: 600px; margin: 0.5rem auto 0 auto;">
+        SkillLens organizes your preparation into an actionable, measurable pipeline.
+      </p>
+    </div>
+
+    <div class="grid-3">
+      <!-- Feature 1 -->
+      <div class="card" style="border-top: 4px solid var(--primary-blue);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <span style="font-size: 1.8rem;">1️⃣</span>
+          <span class="pill pill-brand">Skill Selection</span>
+        </div>
+        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-navy);">
+          Skill Catalog & Picker
+        </h3>
+        <p style="color: var(--text-muted); font-size: 0.92rem;">
+          Select what you know across Programming, AI & ML, Web, and Databases. Add custom coursework skills anytime.
+        </p>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="card" style="border-top: 4px solid var(--success);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <span style="font-size: 1.8rem;">2️⃣</span>
+          <span class="pill pill-success">Instant Tasks</span>
+        </div>
+        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-navy);">
+          What Can I Build Now?
+        </h3>
+        <p style="color: var(--text-muted); font-size: 0.92rem;">
+          Instant confidence booster! Discover hands-on mini-tasks matching your exact current skillset with estimated build times.
+        </p>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="card" style="border-top: 4px solid var(--warning);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <span style="font-size: 1.8rem;">3️⃣</span>
+          <span class="pill pill-warning">Gap Analysis</span>
+        </div>
+        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-navy);">
+          Target Role Gap Analysis
+        </h3>
+        <p style="color: var(--text-muted); font-size: 0.92rem;">
+          Benchmark against roles like <em>AI & ML Intern</em> or <em>Backend Developer</em>. See skills in Green (Have) vs Red (Missing).
+        </p>
+      </div>
+
+      <!-- Feature 4 -->
+      <div class="card" style="border-top: 4px solid var(--accent-violet);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <span style="font-size: 1.8rem;">4️⃣</span>
+          <span class="pill pill-violet">AI Recommendations</span>
+        </div>
+        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-navy);">
+          AI Projects & Evidence
+        </h3>
+        <p style="color: var(--text-muted); font-size: 0.92rem;">
+          AI suggests tailored projects to bridge your exact missing gaps. Submit your GitHub repository link as proof of work.
+        </p>
+      </div>
+
+      <!-- Feature 5 -->
+      <div class="card" style="border-top: 4px solid var(--primary-blue);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <span style="font-size: 1.8rem;">5️⃣</span>
+          <span class="pill pill-brand">Readiness Index</span>
+        </div>
+        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-navy);">
+          30-Day Sprint Roadmap
+        </h3>
+        <p style="color: var(--text-muted); font-size: 0.92rem;">
+          Get a week-by-week actionable sprint plan with key milestones and export a clean PDF report for hackathon judges and recruiters.
+        </p>
+      </div>
+
+      <!-- Architecture Card -->
+      <div class="card" style="background: linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%); border-color: #bfdbfe;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <span style="font-size: 1.8rem;">⚙️</span>
+          <span class="pill pill-brand">Architecture</span>
+        </div>
+        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-navy);">
+          Hackathon-Optimized Stack
+        </h3>
+        <p style="color: var(--text-body); font-size: 0.92rem;">
+          Powered by Python Flask, Supabase PostgreSQL, and Google Gemini AI with automatic local offline fallback.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final Call to Action -->
+  <section style="background: var(--gradient-brand); border-radius: var(--radius-lg); padding: 3.5rem 2rem; text-align: center; color: #ffffff; margin-bottom: 2rem; box-shadow: var(--shadow-glow);">
+    <h2 style="font-size: 2.2rem; font-weight: 800; color: #ffffff; margin-bottom: 1rem;">
+      Ready to test your internship readiness?
+    </h2>
+    <p style="font-size: 1.1rem; color: #e0e7ff; max-width: 600px; margin: 0 auto 2rem auto;">
+      Jump straight into the demo student dashboard to explore skills, tasks, and generated plans in under 30 seconds.
+    </p>
+    <a href="{{ url_for('login_demo') }}" class="btn" style="background: #ffffff; color: var(--primary-blue); font-weight: 700; font-size: 1.05rem; padding: 0.85rem 2rem; border-radius: 10px;">
+      ⚡ Launch Demo Account (Alex Chen)
     </a>
-    <a href="{{ url_for('login') }}" class="btn btn-outline" style="font-size: 1.05rem; padding: 0.8rem 1.8rem;">
-      Create Account
-    </a>
-  </div>
+  </section>
 
-  <!-- Feature Grid -->
-  <div class="grid-3" style="text-align: left;">
-    <div class="card">
-      <div style="font-size: 2rem; margin-bottom: 0.75rem;">1️⃣</div>
-      <h3 style="font-weight: 700; margin-bottom: 0.5rem;">Skill Selection</h3>
-      <p style="color: #64748b; font-size: 0.95rem;">Pick the programming languages, tools, and libraries you currently know.</p>
-    </div>
-
-    <div class="card">
-      <div style="font-size: 2rem; margin-bottom: 0.75rem;">2️⃣</div>
-      <h3 style="font-weight: 700; margin-bottom: 0.5rem;">Instant Tasks</h3>
-      <p style="color: #64748b; font-size: 0.95rem;">Discover real-world mini-tasks you can build right now with zero extra learning.</p>
-    </div>
-
-    <div class="card">
-      <div style="font-size: 2rem; margin-bottom: 0.75rem;">3️⃣</div>
-      <h3 style="font-weight: 700; margin-bottom: 0.5rem;">Gap Analysis</h3>
-      <p style="color: #64748b; font-size: 0.95rem;">Compare your profile with real internship job specifications to see what's missing.</p>
-    </div>
-
-    <div class="card">
-      <div style="font-size: 2rem; margin-bottom: 0.75rem;">4️⃣</div>
-      <h3 style="font-weight: 700; margin-bottom: 0.5rem;">AI Projects & Evidence</h3>
-      <p style="color: #64748b; font-size: 0.95rem;">Receive AI project ideas targeting missing skills and submit your GitHub repositories.</p>
-    </div>
-
-    <div class="card">
-      <div style="font-size: 2rem; margin-bottom: 0.75rem;">5️⃣</div>
-      <h3 style="font-weight: 700; margin-bottom: 0.5rem;">30-Day Learning Plan</h3>
-      <p style="color: #64748b; font-size: 0.95rem;">Get a week-by-week sprint roadmap to achieve 90%+ internship readiness.</p>
-    </div>
-
-    <div class="card" style="background: linear-gradient(135deg, #eef2ff 0%, #ecfeff 100%); border-color: #c7d2fe;">
-      <div style="font-size: 2rem; margin-bottom: 0.75rem;">⚡</div>
-      <h3 style="font-weight: 700; margin-bottom: 0.5rem;">Hackathon Ready</h3>
-      <p style="color: #4338ca; font-size: 0.95rem;">Runs fully offline or backed by Supabase & Gemini AI in the cloud.</p>
-    </div>
-  </div>
 </div>
 {% endblock %}
