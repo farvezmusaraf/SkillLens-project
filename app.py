@@ -3,9 +3,12 @@ SkillLens - Hackathon MVP Main Application Entry Point
 Flask Backend coordinating routes, gap analysis, AI services, and data storage.
 Refocused strictly on 4 Core Beginner Skills: Python, HTML, CSS, JavaScript.
 """
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from pathlib import Path
 from functools import wraps
 import json
+
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from flask_session import Session
 
 from services.config import FLASK_SECRET_KEY, FLASK_DEBUG
 from services import supabase_service as db
@@ -16,6 +19,21 @@ app = Flask(__name__)
 app.secret_key = FLASK_SECRET_KEY
 
 # -------------------------------------------------------------
+# Secure Server-Side Session Storage (Phase 6)
+# -------------------------------------------------------------
+session_dir = Path(__file__).resolve().parent / '.flask_sessions'
+session_dir.mkdir(parents=True, exist_ok=True)
+
+app.config['SESSION_TYPE'] = 'filesystem'
+app.config['SESSION_FILE_DIR'] = str(session_dir)
+app.config['SESSION_PERMANENT'] = False
+app.config['SESSION_USE_SIGNER'] = True
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_SECURE'] = not FLASK_DEBUG  # True on HTTPS production, False in local dev
+Session(app)
+
+# -------------------------------------------------------------
 # Authentication Helper / Decorator
 # -------------------------------------------------------------
 def login_required(f):
@@ -23,6 +41,10 @@ def login_required(f):
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
             flash('Please log in or try the instant demo account to access SkillLens.', 'info')
+            return redirect(url_for('login'))
+        if not get_current_user():
+            session.clear()
+            flash('Your session has expired. Please log in again.', 'warning')
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
@@ -50,7 +72,15 @@ def inject_global_data():
             'is_all_completed': False,
             'unselected_skills': ['HTML', 'CSS', 'JavaScript']
         }
-    return dict(current_user=user, available_roles=roles, next_skills=next_skills, user_skills=user_skills)
+    supabase_connected, supabase_msg = db.get_supabase_status()
+    return dict(
+        current_user=user,
+        available_roles=roles,
+        next_skills=next_skills,
+        user_skills=user_skills,
+        supabase_connected=supabase_connected,
+        supabase_status_msg=supabase_msg
+    )
 
 
 # -------------------------------------------------------------
@@ -69,15 +99,22 @@ def login():
         email = request.form.get('email', '').strip()
         password = request.form.get('password', '').strip()
         
-        user = db.authenticate_user(email, password)
-        if user:
+        result = db.login_student(email, password)
+        if result.get('success'):
+            user = result['user']
+            session.clear()  # Prevent session fixation
             session['user_id'] = user['id']
-            session['user_name'] = user['full_name']
-            session['user_role'] = user['target_role']
+            session['user_name'] = user.get('full_name', 'Student')
+            session['user_email'] = user.get('email', email)
+            session['user_role'] = user.get('target_role', 'Junior Full-Stack Starter')
+            if result.get('access_token'):
+                session['access_token'] = result['access_token']
+            if result.get('refresh_token'):
+                session['refresh_token'] = result['refresh_token']
             flash(f"Welcome back, {user['full_name']}!", 'success')
             return redirect(url_for('dashboard'))
         else:
-            flash('Invalid email or password. You can also use the Instant Demo button below.', 'danger')
+            flash(result.get('error', 'Invalid email or password. Please try again.'), 'danger')
             
     return render_template('login.html')
 
@@ -89,8 +126,10 @@ def login_demo():
     demo_user_id = '00000000-0000-0000-0000-000000000001'
     user = db.get_user_profile(demo_user_id)
     if user:
+        session.clear()
         session['user_id'] = user['id']
         session['user_name'] = user['full_name']
+        session['user_email'] = user.get('email', 'demo@student.edu')
         session['user_role'] = user['target_role']
         flash("Logged in as Demo Student (Alex Chen)!", 'success')
     return redirect(url_for('dashboard'))
@@ -101,20 +140,54 @@ def register():
     full_name = request.form.get('full_name', '').strip()
     email = request.form.get('email', '').strip()
     password = request.form.get('password', '').strip()
-    target_role = request.form.get('target_role', 'Junior Full-Stack Starter')
+    confirm_password = request.form.get('confirm_password', '').strip()
+    college_name = request.form.get('college_name', '').strip()
+    course = request.form.get('course', 'B.Tech CSE (AI & ML)').strip()
+    year_of_study = request.form.get('year_of_study', 'First Year').strip()
     
-    if not full_name or not email or not password:
+    # 1. Validate required fields
+    if not full_name or not email or not password or not confirm_password:
         flash('Please fill in all required fields.', 'danger')
         return redirect(url_for('login'))
         
-    result = db.register_user(email, password, full_name, target_role)
+    if password != confirm_password:
+        flash('Passwords do not match. Please re-enter your password.', 'danger')
+        return redirect(url_for('login'))
+
+    if len(password) < 6:
+        flash('Password must be at least 6 characters long.', 'danger')
+        return redirect(url_for('login'))
+
+    if not db.is_valid_email(email):
+        flash('Please enter a valid college or personal email address.', 'danger')
+        return redirect(url_for('login'))
+        
+    result = db.register_student(
+        email=email,
+        password=password,
+        full_name=full_name,
+        college_name=college_name,
+        course=course,
+        year_of_study=year_of_study
+    )
+    
     if result.get('success'):
         user = result['user']
-        session['user_id'] = user['id']
-        session['user_name'] = user['full_name']
-        session['user_role'] = user['target_role']
-        flash('Account created successfully! Start by selecting your beginner skills.', 'success')
-        return redirect(url_for('skills'))
+        if result.get('requires_email_confirmation'):
+            flash('Account created successfully! Please check your email inbox to verify your account, then sign in.', 'info')
+            return redirect(url_for('login'))
+        else:
+            session.clear()
+            session['user_id'] = user['id']
+            session['user_name'] = user['full_name']
+            session['user_email'] = user.get('email', email)
+            session['user_role'] = user.get('target_role', 'Junior Full-Stack Starter')
+            if result.get('access_token'):
+                session['access_token'] = result['access_token']
+            if result.get('refresh_token'):
+                session['refresh_token'] = result['refresh_token']
+            flash('Account created successfully! Welcome to SkillLens.', 'success')
+            return redirect(url_for('skills'))
     else:
         flash(result.get('error', 'Registration failed.'), 'danger')
         return redirect(url_for('login'))
@@ -122,8 +195,9 @@ def register():
 
 @app.route('/logout')
 def logout():
+    db.logout_student()
     session.clear()
-    flash('You have been logged out.', 'info')
+    flash('You have been logged out safely.', 'info')
     return redirect(url_for('index'))
 
 

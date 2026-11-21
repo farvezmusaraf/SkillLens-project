@@ -5,10 +5,8 @@ echo Starting SkillLens Hackathon MVP...
 echo ========================================================
 echo.
 
-set PYTHON_EXE=C:\Users\farve_y7b0tn1\AppData\Local\Python\pythoncore-3.14-64\python.exe
-
-if exist "%PYTHON_EXE%" (
-    "%PYTHON_EXE%" app.py
+if exist ".venv\Scripts\python.exe" (
+    ".venv\Scripts\python.exe" app.py
 ) else (
     python app.py
 )

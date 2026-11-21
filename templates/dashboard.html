@@ -15,7 +15,11 @@
         <h1 style="font-size: 2rem; font-weight: 800; margin-bottom: 0.25rem; color: #fff;">
           Welcome back, {{ user.full_name }}! 👋
         </h1>
-        <p style="color: #c7d2fe; font-size: 1rem;">
+        <p style="color: #c7d2fe; font-size: 0.92rem; margin-top: 0.35rem;">
+          {% if user.college_name %}🏛️ {{ user.college_name }} &bull; {% endif %}
+          🎓 {{ user.course or 'B.Tech CSE (AI & ML)' }} ({{ user.year_of_study or '1st Year' }}) &bull; ✉️ {{ user.email or session.get('user_email', '') }}
+        </p>
+        <p style="color: #e0e7ff; font-size: 0.88rem; margin-top: 0.25rem;">
           Here is your beginner progress across the 4 core foundations: Python, HTML, CSS, and JavaScript.
         </p>
       </div>
