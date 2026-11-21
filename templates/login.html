@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In / Register | SkillLens{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 480px; margin-top: 2rem;">
+  <div class="card">
+    <div style="text-align: center; margin-bottom: 1.5rem;">
+      <h2 style="font-weight: 800; font-size: 1.6rem; color: #0f172a;">Welcome to SkillLens</h2>
+      <p style="color: #64748b; font-size: 0.9rem;">Sign in to track your skills and build internship readiness.</p>
+    </div>
+
+    <!-- Tab Selector -->
+    <div style="display: flex; border-bottom: 1px solid #e2e8f0; margin-bottom: 1.5rem;">
+      <button id="tabLoginBtn" type="button" onclick="showTab('login')" style="flex: 1; padding: 0.6rem; background: none; border: none; border-bottom: 2px solid var(--primary); font-weight: 700; cursor: pointer; color: var(--primary);">
+        Sign In
+      </button>
+      <button id="tabRegisterBtn" type="button" onclick="showTab('register')" style="flex: 1; padding: 0.6rem; background: none; border: none; border-bottom: 2px solid transparent; font-weight: 600; cursor: pointer; color: var(--text-muted);">
+        New Account
+      </button>
+    </div>
+
+    <!-- Login Form -->
+    <div id="loginSection">
+      <form action="{{ url_for('login') }}" method="POST">
+        <div class="form-group">
+          <label class="form-label" for="loginEmail">Student Email</label>
+          <input type="email" id="loginEmail" name="email" class="form-control" placeholder="alex@student.edu" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" name="password" class="form-control" placeholder="••••••••" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+          Sign In
+        </button>
+      </form>
+    </div>
+
+    <!-- Register Form -->
+    <div id="registerSection" style="display: none;">
+      <form action="{{ url_for('register') }}" method="POST">
+        <div class="form-group">
+          <label class="form-label" for="regName">Full Name</label>
+          <input type="text" id="regName" name="full_name" class="form-control" placeholder="Alex Chen" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regEmail">College / Personal Email</label>
+          <input type="email" id="regEmail" name="email" class="form-control" placeholder="alex@college.edu" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regPass">Password</label>
+          <input type="password" id="regPass" name="password" class="form-control" placeholder="••••••••" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regRole">Target Internship Role</label>
+          <select id="regRole" name="target_role" class="form-control">
+            {% for r in available_roles %}
+              <option value="{{ r }}">{{ r }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+          Create My Profile
+        </button>
+      </form>
+    </div>
+
+    <!-- Instant Demo Login for Hackathon -->
+    <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px dashed #cbd5e1; text-align: center;">
+      <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 0.75rem;">Hackathon Judge or Quick Test?</p>
+      <a href="{{ url_for('login_demo') }}" class="btn btn-outline" style="width: 100%; font-size: 0.9rem;">
+        ⚡ 1-Click Instant Student Demo Login
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function showTab(tab) {
+    const loginSection = document.getElementById('loginSection');
+    const registerSection = document.getElementById('registerSection');
+    const tabLoginBtn = document.getElementById('tabLoginBtn');
+    const tabRegisterBtn = document.getElementById('tabRegisterBtn');
+
+    if (tab === 'login') {
+      loginSection.style.display = 'block';
+      registerSection.style.display = 'none';
+      tabLoginBtn.style.borderBottom = '2px solid var(--primary)';
+      tabLoginBtn.style.color = 'var(--primary)';
+      tabLoginBtn.style.fontWeight = '700';
+      tabRegisterBtn.style.borderBottom = '2px solid transparent';
+      tabRegisterBtn.style.color = 'var(--text-muted)';
+      tabRegisterBtn.style.fontWeight = '600';
+    } else {
+      loginSection.style.display = 'none';
+      registerSection.style.display = 'block';
+      tabRegisterBtn.style.borderBottom = '2px solid var(--primary)';
+      tabRegisterBtn.style.color = 'var(--primary)';
+      tabRegisterBtn.style.fontWeight = '700';
+      tabLoginBtn.style.borderBottom = '2px solid transparent';
+      tabLoginBtn.style.color = 'var(--text-muted)';
+      tabLoginBtn.style.fontWeight = '600';
+    }
+  }
+</script>
+{% endblock %}

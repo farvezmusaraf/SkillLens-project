@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}1. Select Your Skills | SkillLens{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 900px;">
+  <!-- Header -->
+  <div style="margin-bottom: 1.5rem;">
+    <span class="badge badge-primary">Feature 1</span>
+    <h1 style="font-size: 2rem; font-weight: 800; margin-top: 0.5rem;">Select Your Existing Skills</h1>
+    <p style="color: #64748b;">
+      Check off the programming languages, frameworks, and tools you have learned so far in your BTech coursework or self-study.
+    </p>
+  </div>
+
+  <!-- Search & Filter Bar -->
+  <div class="card" style="margin-bottom: 1.5rem; padding: 1rem 1.5rem;">
+    <div style="display: flex; gap: 1rem; align-items: center;">
+      <span style="font-size: 1.2rem;">🔍</span>
+      <input type="text" id="skillSearchInput" class="form-control" placeholder="Search skills (e.g. Python, SQL, Git, Pandas)...">
+    </div>
+  </div>
+
+  <!-- Skills Form -->
+  <form action="{{ url_for('skills') }}" method="POST">
+    {% for category, skill_list in categories.items() %}
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <h3 style="font-size: 1.15rem; font-weight: 700; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; margin-bottom: 1rem; display: flex; justify-content: space-between;">
+          <span>{{ category }}</span>
+          <span style="font-size: 0.85rem; color: #64748b; font-weight: 500;">{{ skill_list|length }} options</span>
+        </h3>
+
+        <div class="skill-checkbox-grid">
+          {% for s in skill_list %}
+            <label class="skill-tag-label">
+              <input type="checkbox" name="selected_skills" value="{{ s.name }}" {% if s.name in user_skills %}checked{% endif %}>
+              <span>{{ s.name }}</span>
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+
+    <!-- Custom Skill Input -->
+    <div class="card" style="margin-bottom: 2rem;">
+      <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem;">Don't see a skill you know?</h3>
+      <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 1rem;">
+        Type any library, tool, or language here to add it to your profile.
+      </p>
+      <div style="display: flex; gap: 0.75rem;">
+        <input type="text" name="custom_skill" class="form-control" placeholder="e.g. Django, LangChain, Linux CLI, Seaborn">
+      </div>
+    </div>
+
+    <!-- Save & Continue CTA -->
+    <div style="position: sticky; bottom: 1.5rem; background: var(--bg-card); padding: 1rem 1.5rem; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-lg); display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <span style="font-weight: 600; font-size: 0.95rem;">Ready to discover what you can build?</span>
+        <p style="color: #64748b; font-size: 0.85rem;">Saving will instantly unlock your matched practical tasks.</p>
+      </div>
+      <button type="submit" class="btn btn-primary" style="font-size: 1rem; padding: 0.75rem 1.75rem;">
+        Save Skills & Discover Tasks &rarr;
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

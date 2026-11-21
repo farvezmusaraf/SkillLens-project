@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}2. Discover Practical Tasks | SkillLens{% endblock %}
+
+{% block content %}
+<div class="container">
+  <!-- Header -->
+  <div style="margin-bottom: 2rem;">
+    <span class="badge badge-success">Feature 2</span>
+    <h1 style="font-size: 2rem; font-weight: 800; margin-top: 0.5rem;">Tasks You Can Build Right Now</h1>
+    <p style="color: #64748b; font-size: 1.05rem;">
+      No more "tutorial paralysis". These practical micro-tasks are calculated directly from your current skills ({{ user_skills|join(', ') }}).
+    </p>
+  </div>
+
+  {% if matched_tasks %}
+    <div class="grid-2">
+      {% for task in matched_tasks %}
+        <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; border-left: 4px solid {% if task.is_ready_now %}var(--success){% else %}var(--warning){% endif %};">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+              <span class="badge {% if task.is_ready_now %}badge-success{% else %}badge-warning{% endif %}">
+                {% if task.is_ready_now %}
+                  ✅ 100% Ready to Build
+                {% else %}
+                  ⚡ {{ task.coverage_pct }}% Skill Coverage
+                {% endif %}
+              </span>
+              <span style="font-size: 0.8rem; color: #64748b; font-weight: 600;">⏱️ {{ task.estimated_time }}</span>
+            </div>
+
+            <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; color: #0f172a;">
+              {{ task.title }}
+            </h3>
+            
+            <p style="color: #475569; font-size: 0.95rem; margin-bottom: 1.25rem;">
+              {{ task.description }}
+            </p>
+
+            <!-- Skills Breakdown -->
+            <div style="margin-bottom: 1rem;">
+              <div style="font-size: 0.85rem; font-weight: 600; color: #64748b; margin-bottom: 0.35rem;">Skills Used:</div>
+              <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+                {% for s in task.skills_have %}
+                  <span class="badge badge-success">✓ {{ s }}</span>
+                {% endfor %}
+                {% for s in task.skills_missing %}
+                  <span class="badge badge-warning">+ Learn {{ s }}</span>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.85rem; color: #64748b;">Category: <strong>{{ task.category }}</strong></span>
+            <a href="{{ url_for('projects') }}" class="btn btn-outline btn-sm">
+              Build & Submit as Evidence &rarr;
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card" style="text-align: center; padding: 3rem 1rem;">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+      <h3 style="font-weight: 700;">No tasks found matching your current selection</h3>
+      <p style="color: #64748b; margin-bottom: 1.5rem;">Select a few skills like Python, Pandas, or HTML/CSS to reveal tasks.</p>
+      <a href="{{ url_for('skills') }}" class="btn btn-primary">Go to Skill Selection</a>
+    </div>
+  {% endif %}
+
+  <!-- Bottom Navigation -->
+  <div style="margin-top: 2.5rem; text-align: center; padding: 2rem; background: var(--primary-light); border-radius: var(--radius);">
+    <h3 style="font-weight: 700; color: var(--primary); margin-bottom: 0.5rem;">Ready to compare against an Internship?</h3>
+    <p style="color: #4338ca; font-size: 0.95rem; margin-bottom: 1.25rem;">
+      See which skills are missing for your dream role like "AI & ML Intern" or "Python Backend Intern".
+    </p>
+    <a href="{{ url_for('gap_analysis') }}" class="btn btn-primary">
+      Step 3: Analyze Internship Skill Gaps &rarr;
+    </a>
+  </div>
+</div>
+{% endblock %}

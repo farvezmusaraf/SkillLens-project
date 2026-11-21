@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container" style="max-width: 900px; text-align: center; padding: 3rem 1rem;">
+  <span class="badge badge-primary" style="margin-bottom: 1rem; padding: 0.4rem 1rem; font-size: 0.85rem;">
+    🚀 Hackathon MVP for Student Engineers
+  </span>
+  
+  <h1 style="font-size: 2.8rem; font-weight: 800; line-height: 1.2; margin-bottom: 1.2rem; color: #0f172a;">
+    Turn Your Classroom Skills Into <br>
+    <span style="background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+      Real Internship Readiness
+    </span>
+  </h1>
+
+  <p style="font-size: 1.2rem; color: #64748b; margin-bottom: 2.5rem; max-width: 700px; margin-left: auto; margin-right: auto;">
+    Don't wait for your 3rd year to know what recruiters want. SkillLens maps your existing skills, reveals practical projects you can build today, pinpoints internship gaps, and gives you a 30-day plan.
+  </p>
+
+  <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 3.5rem;">
+    <a href="{{ url_for('login_demo') }}" class="btn btn-primary" style="font-size: 1.05rem; padding: 0.8rem 1.8rem;">
+      🎯 Launch Instant Student Demo
+    </a>
+    <a href="{{ url_for('login') }}" class="btn btn-outline" style="font-size: 1.05rem; padding: 0.8rem 1.8rem;">
+      Create Account
+    </a>
+  </div>
+
+  <!-- Feature Grid -->
+  <div class="grid-3" style="text-align: left;">
+    <div class="card">
+      <div style="font-size: 2rem; margin-bottom: 0.75rem;">1️⃣</div>
+      <h3 style="font-weight: 700; margin-bottom: 0.5rem;">Skill Selection</h3>
+      <p style="color: #64748b; font-size: 0.95rem;">Pick the programming languages, tools, and libraries you currently know.</p>
+    </div>
+
+    <div class="card">
+      <div style="font-size: 2rem; margin-bottom: 0.75rem;">2️⃣</div>
+      <h3 style="font-weight: 700; margin-bottom: 0.5rem;">Instant Tasks</h3>
+      <p style="color: #64748b; font-size: 0.95rem;">Discover real-world mini-tasks you can build right now with zero extra learning.</p>
+    </div>
+
+    <div class="card">
+      <div style="font-size: 2rem; margin-bottom: 0.75rem;">3️⃣</div>
+      <h3 style="font-weight: 700; margin-bottom: 0.5rem;">Gap Analysis</h3>
+      <p style="color: #64748b; font-size: 0.95rem;">Compare your profile with real internship job specifications to see what's missing.</p>
+    </div>
+
+    <div class="card">
+      <div style="font-size: 2rem; margin-bottom: 0.75rem;">4️⃣</div>
+      <h3 style="font-weight: 700; margin-bottom: 0.5rem;">AI Projects & Evidence</h3>
+      <p style="color: #64748b; font-size: 0.95rem;">Receive AI project ideas targeting missing skills and submit your GitHub repositories.</p>
+    </div>
+
+    <div class="card">
+      <div style="font-size: 2rem; margin-bottom: 0.75rem;">5️⃣</div>
+      <h3 style="font-weight: 700; margin-bottom: 0.5rem;">30-Day Learning Plan</h3>
+      <p style="color: #64748b; font-size: 0.95rem;">Get a week-by-week sprint roadmap to achieve 90%+ internship readiness.</p>
+    </div>
+
+    <div class="card" style="background: linear-gradient(135deg, #eef2ff 0%, #ecfeff 100%); border-color: #c7d2fe;">
+      <div style="font-size: 2rem; margin-bottom: 0.75rem;">⚡</div>
+      <h3 style="font-weight: 700; margin-bottom: 0.5rem;">Hackathon Ready</h3>
+      <p style="color: #4338ca; font-size: 0.95rem;">Runs fully offline or backed by Supabase & Gemini AI in the cloud.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

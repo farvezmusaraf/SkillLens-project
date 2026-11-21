@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}5. Internship Readiness Report & 30-Day Plan | SkillLens{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 950px;">
+
+  <!-- Action Bar (Print / Export) -->
+  <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <span class="badge badge-success">Feature 5</span>
+      <h1 style="font-size: 2rem; font-weight: 800; margin-top: 0.25rem;">Internship Readiness Report</h1>
+      <p style="color: #64748b;">Comprehensive roadmap and score for <strong>{{ target_role }}</strong>.</p>
+    </div>
+    <div style="display: flex; gap: 0.75rem;">
+      <button id="printReportBtn" type="button" class="btn btn-outline btn-print">
+        🖨️ Print / Save as PDF
+      </button>
+      <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+        Back to Dashboard
+      </a>
+    </div>
+  </div>
+
+  <!-- Printable Header Card -->
+  <div class="card" style="margin-bottom: 2rem; border-top: 6px solid var(--primary);">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem;">
+      <div>
+        <span style="font-size: 0.85rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">
+          Candidate Readiness Assessment
+        </span>
+        <h2 style="font-size: 1.8rem; font-weight: 800; color: #0f172a; margin: 0.2rem 0;">
+          {{ user.full_name }}
+        </h2>
+        <p style="color: #475569; font-size: 0.95rem;">
+          Target Internship Track: <strong>{{ target_role }}</strong> &bull; Generated: Hackathon Assessment
+        </p>
+      </div>
+
+      <!-- Readiness Dial / Score Box -->
+      <div style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: #fff; padding: 1.25rem 2rem; border-radius: var(--radius); text-align: center; min-width: 180px;">
+        <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: #c7d2fe;">READINESS SCORE</span>
+        <div style="font-size: 3rem; font-weight: 900; line-height: 1; color: #38bdf8; margin: 0.25rem 0;">
+          {{ composite_score }}%
+        </div>
+        <span class="badge" style="background: rgba(255,255,255,0.2); color: #fff; font-size: 0.75rem;">
+          {{ gap.status_label }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Score Formula Breakdown for Judges -->
+    <div style="background: #f8fafc; border-radius: var(--radius-sm); padding: 1rem; border: 1px solid var(--border); font-size: 0.9rem; color: #475569;">
+      <strong>Score Calculation:</strong> 
+      Base Skill Match: <strong>{{ base_score }}%</strong> (75% weight) + 
+      Portfolio Evidence Bonus: <strong>+{{ evidence_bonus }}%</strong> ({{ evidence_list|length }} verified projects) = 
+      <strong style="color: var(--primary);">{{ composite_score }}% Overall Readiness</strong>
+    </div>
+  </div>
+
+  <!-- Skills Breakdown Summary -->
+  <div class="grid-2" style="margin-bottom: 2rem;">
+    <!-- Acquired -->
+    <div class="card">
+      <h3 style="font-size: 1.1rem; font-weight: 700; color: #065f46; margin-bottom: 0.75rem;">
+        ✅ Current Strengths ({{ gap.acquired_skills|length }})
+      </h3>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+        {% for s in gap.acquired_skills %}
+          <span class="badge badge-success">✓ {{ s.name }}</span>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Missing Gaps -->
+    <div class="card">
+      <h3 style="font-size: 1.1rem; font-weight: 700; color: #991b1b; margin-bottom: 0.75rem;">
+        ⚠️ Areas to Develop ({{ gap.missing_required|length + gap.missing_preferred|length }})
+      </h3>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+        {% for ms in gap.missing_required %}
+          <span class="badge badge-danger">⚠️ {{ ms }}</span>
+        {% endfor %}
+        {% for mp in gap.missing_preferred %}
+          <span class="badge badge-warning">💡 {{ mp }}</span>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- 30-Day Structured Learning Plan -->
+  <div class="card" style="margin-bottom: 2.5rem;">
+    <div style="margin-bottom: 1.5rem;">
+      <span class="badge badge-primary">Structured Roadmap</span>
+      <h2 style="font-size: 1.5rem; font-weight: 800; margin-top: 0.25rem;">
+        🗓️ Personalized 30-Day Sprint Plan
+      </h2>
+      <p style="color: #64748b; font-size: 0.95rem;">
+        {{ plan.overview or 'Follow this 4-week structured sprint to build public proof of competency and reach 90%+ readiness.' }}
+      </p>
+    </div>
+
+    <!-- Timeline of Weeks -->
+    <div class="timeline">
+      {% for week in plan.weeks %}
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; box-shadow: var(--shadow-sm);">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem;">
+              <span class="badge badge-primary" style="font-size: 0.8rem;">Week {{ week.week_number }}</span>
+              <strong style="color: var(--primary); font-size: 1.05rem;">{{ week.theme }}</strong>
+            </div>
+
+            <p style="font-size: 0.9rem; color: #475569; margin-bottom: 1rem;">
+              🎯 <strong>Sprint Goal:</strong> {{ week.goal }}
+            </p>
+
+            <!-- Days Checklist -->
+            <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; background: #f8fafc; padding: 0.75rem; border-radius: var(--radius-sm);">
+              {% for d in week.days %}
+                <div style="display: flex; gap: 0.75rem; font-size: 0.9rem;">
+                  <span style="font-weight: 700; color: var(--primary); min-width: 80px;">{{ d.day_range }}:</span>
+                  <span style="color: #334155;">{{ d.task }}</span>
+                </div>
+              {% endfor %}
+            </div>
+
+            <!-- Milestone -->
+            <div style="font-size: 0.85rem; font-weight: 600; color: #065f46; background: var(--success-light); padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); border: 1px solid #a7f3d0;">
+              🏁 <strong>Key Deliverable:</strong> {{ week.milestone }}
+            </div>
+
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Recruiter Pitch Checklist for Judges -->
+  <div class="card" style="background: #f8fafc; border: 1px dashed var(--border);">
+    <h3 style="font-weight: 700; font-size: 1.1rem; margin-bottom: 0.5rem;">Student Internship Action Checklist</h3>
+    <ul style="padding-left: 1.2rem; font-size: 0.9rem; color: #475569; display: flex; flex-direction: column; gap: 0.4rem;">
+      <li>✅ Keep active GitHub repositories with descriptive README files and setup instructions.</li>
+      <li>✅ Focus on learning 1 missing skill per week following the sprint roadmap above.</li>
+      <li>✅ Submit repository URLs on SkillLens to automatically increase your readiness index.</li>
+      <li>✅ Export this readiness report as a PDF to share alongside your resume when applying.</li>
+    </ul>
+  </div>
+
+</div>
+{% endblock %}

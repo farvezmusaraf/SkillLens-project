@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}SkillLens | AI Internship Readiness Engine{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container nav-content">
+      <a href="{{ url_for('dashboard' if current_user else 'index') }}" class="logo">
+        <span>🎯 SkillLens</span>
+      </a>
+
+      <nav>
+        <ul class="nav-links">
+          {% if current_user %}
+            <li><a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">Dashboard</a></li>
+            <li><a href="{{ url_for('skills') }}" class="nav-link {% if request.endpoint == 'skills' %}active{% endif %}">1. Skills</a></li>
+            <li><a href="{{ url_for('tasks') }}" class="nav-link {% if request.endpoint == 'tasks' %}active{% endif %}">2. Tasks</a></li>
+            <li><a href="{{ url_for('gap_analysis') }}" class="nav-link {% if request.endpoint == 'gap_analysis' %}active{% endif %}">3. Gap Analysis</a></li>
+            <li><a href="{{ url_for('projects') }}" class="nav-link {% if request.endpoint == 'projects' %}active{% endif %}">4. AI Projects</a></li>
+            <li><a href="{{ url_for('readiness') }}" class="nav-link {% if request.endpoint == 'readiness' %}active{% endif %}">5. Readiness Plan</a></li>
+            <li><a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm">Log Out</a></li>
+          {% else %}
+            <li><a href="{{ url_for('login') }}" class="nav-link">Sign In</a></li>
+            <li><a href="{{ url_for('login_demo') }}" class="btn btn-primary btn-sm">Instant Demo</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Flash Notifications -->
+  <div class="container flash-container no-print">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">
+            <span>{{ message }}</span>
+            <button onclick="this.parentElement.remove()" style="background:none; border:none; cursor:pointer; font-size:1.1rem; color:inherit;">&times;</button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <!-- Main Body Content -->
+  <main style="padding: 2rem 0; flex: 1;">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="no-print">
+    <div class="container">
+      <p><strong>SkillLens</strong> &bull; Hackathon MVP built with Python Flask & Supabase.</p>
+      <p style="margin-top: 0.25rem;">Empowering 1st-year engineers to bridge classroom theory into high-impact internships.</p>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
