@@ -27,21 +27,8 @@ SkillLens bridges the gap between early university engineering coursework and re
 
 ## 🚀 Quick Start (Running Locally)
 
-### Option A: Double-Click
-Simply double click `run.bat` in the project folder!
+Link :- https://skilllens-project.onrender.com/
 
-### Option B: Terminal Command
-Run in PowerShell inside `d:\SkillLens-projects`:
-```powershell
-& "C:\Users\farve_y7b0tn1\AppData\Local\Python\pythoncore-3.14-64\python.exe" app.py
-```
-Or if standard `python` is in your PATH:
-```bash
-python app.py
-```
-
-Then open your browser and go to:
-👉 **`http://127.0.0.1:5000`**
 
 > [!TIP]
 > **Hackathon 1-Click Demo:** Click the **"Instant Student Demo"** button on the home or login page to instantly sign in as **Alex Chen** with pre-seeded skills, tasks, and evidence!
