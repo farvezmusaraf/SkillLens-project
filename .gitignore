@@ -30,3 +30,10 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+
+
+# Deployment and temporary files
+instance/
+*.log
+.DS_Store
+Thumbs.db

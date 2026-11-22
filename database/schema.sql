@@ -54,9 +54,13 @@ CREATE TABLE IF NOT EXISTS public.student_skills (
     skill_id INTEGER NOT NULL REFERENCES public.skills(id) ON DELETE CASCADE,
     proficiency_level TEXT NOT NULL DEFAULT 'Beginner',
     progress_status TEXT NOT NULL DEFAULT 'Learning',
+    subtopics TEXT[] NOT NULL DEFAULT '{}',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     UNIQUE(student_id, skill_id)
 );
+
+-- Safe non-destructive migration for existing Supabase databases
+ALTER TABLE public.student_skills ADD COLUMN IF NOT EXISTS subtopics TEXT[] DEFAULT '{}';
 
 -- 6. TASKS (Small, Practical Micro-Tasks)
 CREATE TABLE IF NOT EXISTS public.tasks (

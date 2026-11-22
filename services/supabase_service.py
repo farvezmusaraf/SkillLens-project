@@ -102,9 +102,18 @@ def init_local_db():
             user_id TEXT,
             skill_name TEXT,
             proficiency TEXT DEFAULT 'Beginner',
+            progress_status TEXT DEFAULT 'Learning',
+            subtopics TEXT DEFAULT '[]',
             UNIQUE(user_id, skill_name)
         )
     ''')
+
+    cursor.execute("PRAGMA table_info(user_skills)")
+    columns = [col[1] for col in cursor.fetchall()]
+    if 'subtopics' not in columns:
+        cursor.execute("ALTER TABLE user_skills ADD COLUMN subtopics TEXT DEFAULT '[]'")
+    if 'progress_status' not in columns:
+        cursor.execute("ALTER TABLE user_skills ADD COLUMN progress_status TEXT DEFAULT 'Learning'")
     
     # 4. Role Requirements
     cursor.execute('''
